@@ -1,0 +1,78 @@
+/* استایل‌های عمومی برای تمام صفحات پلاگین در پنل مدیریت */
+.my-gym-wrap {
+    direction: rtl;
+    text-align: right;
+    font-family: 'vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
+
+/* بخش آمار و گزارش‌گیری در صفحه حسابداری */
+.dashboard-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.stat-box {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
+    flex: 1;
+    min-width: 200px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+.stat-box:hover {
+    transform: translateY(-5px);
+}
+.stat-box h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #555;
+}
+.stat-box p {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin: 10px 0 0;
+}
+.stat-box.income p {
+    color: #28a745;
+}
+.stat-box.expense p {
+    color: #dc3545;
+}
+.stat-box.balance p {
+    color: #007bff;
+}
+
+/* استایل‌های فرم‌ها و جدول‌ها */
+.postbox {
+    margin-bottom: 20px;
+}
+.postbox .hndle {
+    font-size: 1.1rem;
+    padding: 10px 15px;
+    margin: 0;
+    background: #f7f7f7;
+    border-bottom: 1px solid #eee;
+    border-radius: 8px 8px 0 0;
+}
+.postbox .inside {
+    padding: 15px;
+}
+.form-table th {
+    width: 150px;
+    padding: 10px 10px 10px 0;
+    vertical-align: top;
+}
+.form-table td {
+    padding: 10px 0 10px 10px;
+}
+.widefat {
+    margin-top: 20px;
+}
+.widefat th, .widefat td {
+    text-align: right;
+    padding: 12px;
+}
