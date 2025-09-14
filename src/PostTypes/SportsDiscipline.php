@@ -20,7 +20,7 @@ class SportsDiscipline
             'public' => true,
             'has_archive' => true,
             'supports' => array('title'),
-            'show_in_menu' => true // نمایش در منو
+            'show_in_menu' => true
         );
         register_post_type('sports_discipline', $args);
     }

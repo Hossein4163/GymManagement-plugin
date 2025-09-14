@@ -76,3 +76,21 @@
     text-align: right;
     padding: 12px;
 }
+
+/* استایل برای وضعیت‌های مختلف اقساط */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #fff;
+}
+.status-badge.paid {
+    background-color: #28a745; /* سبز */
+}
+.status-badge.pending {
+    background-color: #ffc107; /* زرد */
+}
+.status-badge.overdue {
+    background-color: #dc3545; /* قرمز */
+}

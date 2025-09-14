@@ -46,7 +46,6 @@
 
     <h2>گزارش فروش بوفه</h2>
     <?php
-    // نمایش گزارشات فروش (فرضی)
     $sales = get_posts(array('post_type' => 'buffet_sale', 'numberposts' => 10));
     ?>
     <table class="widefat fixed striped">

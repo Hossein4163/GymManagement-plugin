@@ -40,19 +40,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    jQuery(document).ready(function ($) {
-        var recipientGroup = $('#recipient_group');
-        var manualNumbersRow = $('#manual_numbers_row');
-
-        recipientGroup.on('change', function () {
-            if ($(this).val() === 'manual') {
-                manualNumbersRow.show();
-            } else {
-                manualNumbersRow.hide();
-            }
-        });
-        recipientGroup.trigger('change'); // فعال‌سازی اولیه
-    });
-</script>

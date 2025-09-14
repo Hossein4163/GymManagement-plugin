@@ -31,7 +31,7 @@ class SmsController
 
     public function send_sms($mobile, $message)
     {
-        $url = "https://api.sms-service.com/send"; // آدرس فرضی API
+        $url = "https://api.sms-service.com/send";
         $args = array(
             'body' => json_encode(array(
                 'api_key' => $this->api_key,

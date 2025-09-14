@@ -1,4 +1,5 @@
 <?php
+// این بخش باید از کنترلر دریافت شود
 $transactions = [
     (object)['id' => 1, 'user_id' => 10, 'user_name' => 'علی احمدی', 'amount' => 500000, 'type' => 'دریافت', 'payment_type' => 'کارت‌خوان', 'date' => '2023-10-01 10:30:00'],
     (object)['id' => 2, 'user_id' => 15, 'user_name' => 'زهرا کریمی', 'amount' => 600000, 'type' => 'دریافت', 'payment_type' => 'آنلاین', 'date' => '2023-10-02 11:45:00'],
@@ -8,7 +9,7 @@ $total_income = 1100000;
 $total_expense = 100000;
 ?>
 
-<div class="wrap">
+<div class="wrap my-gym-wrap">
     <h1 class="wp-heading-inline">حسابداری باشگاه</h1>
     <hr class="wp-header-end">
 
@@ -97,44 +98,3 @@ $total_expense = 100000;
         </tbody>
     </table>
 </div>
-
-<style>
-    .dashboard-stats {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 20px;
-    }
-
-    .stat-box {
-        background: #fff;
-        padding: 20px;
-        border-radius: 5px;
-        box-shadow: 0 1px 1px rgba(0, 0, 0, .04);
-        width: 30%;
-        text-align: center;
-    }
-
-    .stat-box h3 {
-        margin: 0;
-        font-size: 1.2em;
-        color: #555;
-    }
-
-    .stat-box p {
-        font-size: 2em;
-        font-weight: bold;
-        margin: 10px 0 0;
-    }
-
-    .stat-box.income p {
-        color: #4CAF50;
-    }
-
-    .stat-box.expense p {
-        color: #F44336;
-    }
-
-    .stat-box.balance p {
-        color: #2196F3;
-    }
-</style>

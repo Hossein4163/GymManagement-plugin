@@ -7,9 +7,9 @@ namespace Composer\Autoload;
 class ComposerStaticInitf01d4aaad50844adffcb58eea6b42072
 {
     public static $prefixLengthsPsr4 = array (
-        'M' => 
+        'G' => 
         array (
-            'GymManagement\\' => 6,
+            'GymManagement\\' => 14,
         ),
     );
 

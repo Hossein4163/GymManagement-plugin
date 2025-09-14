@@ -2,20 +2,18 @@
 
 namespace GymManagement\Controllers;
 
-use GymManagement\PostTypes\BuffetProduct;
-
 class BuffetController
 {
     public function __construct()
     {
         add_action('admin_menu', array($this, 'add_buffet_menu'));
-        add_action('init', array($this, 'register_buffet_sale_cpt')); // استفاده از پست تایپ به جای جدول
+        add_action('init', array($this, 'register_buffet_sale_cpt'));
     }
 
     public function add_buffet_menu()
     {
         add_submenu_page(
-            'my-gym-accounting', // منوی والد
+            'my-gym-accounting',
             'مدیریت بوفه',
             'بوفه',
             'manage_options',
@@ -32,9 +30,9 @@ class BuffetController
         );
         $args = array(
             'labels' => $labels,
-            'public' => false, // این پست‌ها نباید در سایت نمایش داده شوند
+            'public' => false,
             'show_ui' => true,
-            'show_in_menu' => 'my-gym-accounting', // نمایش در زیرمنوی حسابداری
+            'show_in_menu' => 'my-gym-accounting',
             'supports' => array('title'),
             'capability_type' => 'post',
             'has_archive' => false,

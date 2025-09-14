@@ -1,8 +1,4 @@
 {
-    "name": "RameStudio/GymManagement",
-    "description": "A comprehensive gym accounting plugin for WordPress.",
-    "type": "wordpress-plugin",
-    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "RameStudio",
@@ -14,5 +10,9 @@
             "GymManagement\\": "src/"
         }
     },
-    "require": {}
+    "description": "A comprehensive gym accounting plugin for WordPress.",
+    "license": "GPL-2.0-or-later",
+    "name": "ramestudio/rame-gym-accounting",
+    "require": {},
+    "type": "wordpress-plugin"
 }
