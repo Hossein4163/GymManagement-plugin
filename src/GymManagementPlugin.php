@@ -3,9 +3,13 @@
 namespace GymManagement;
 
 use GymManagement\Controllers\AccountingController;
+use GymManagement\Controllers\FrontendController;
 use GymManagement\Controllers\MembershipController;
 use GymManagement\Controllers\BuffetController;
+use GymManagement\Controllers\NotificationController;
+use GymManagement\Controllers\ReportController;
 use GymManagement\Controllers\SmsController;
+use GymManagement\PostTypes\Expense;
 use GymManagement\PostTypes\SportsDiscipline;
 use GymManagement\PostTypes\BuffetProduct;
 
@@ -35,6 +39,10 @@ class GymManagementPlugin
         new AccountingController();
         new BuffetController();
         new SmsController();
+        new FrontendController();
+        new NotificationController();
+        new ReportController();
+        new Expense();
     }
 
     private function define_hooks()
