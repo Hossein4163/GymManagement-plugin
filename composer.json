@@ -12,7 +12,7 @@
     },
     "description": "A comprehensive gym accounting plugin for WordPress.",
     "license": "GPL-2.0-or-later",
-    "name": "ramestudio/rame-gym-accounting",
+    "name": "ramestudio/rame-gym-management",
     "require": {},
     "type": "wordpress-plugin"
 }

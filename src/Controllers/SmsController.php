@@ -15,12 +15,13 @@ class SmsController
     public function add_sms_menu()
     {
         add_submenu_page(
-            'my-gym-accounting',
+            'rame-gym',
             'ارسال پیامک',
             'پیامک',
             'manage_options',
             'my-gym-sms',
-            array($this, 'render_sms_page')
+            array($this, 'render_sms_page'),
+            null
         );
     }
 

@@ -64,4 +64,63 @@ jQuery(document).ready(function ($) {
         }
     });
     recipientGroup.trigger('change');
+
+    // Ajax برای بارگذاری آمار داشبورد
+    var dashboardData = {
+        'action': 'my_gym_get_dashboard_data',
+        'security': '<?php echo wp_create_nonce('my-gym - security - nonce'); ?>'
+    };
+
+    $.post(ajaxurl, dashboardData, function (response) {
+        if (response.success) {
+            $('#total-income').text(response.data.income.toLocaleString() + ' تومان');
+            $('#total-expense').text(response.data.expense.toLocaleString() + ' تومان');
+            $('#overdue-installments').text(response.data.overdue_installments);
+            $('#total-members').text(response.data.total_members);
+
+            renderCharts(response.data.monthly_data, response.data.disciplines_data);
+        } else {
+            console.error('Failed to load dashboard data: ', response.data);
+        }
+    }).fail(function () {
+        console.error('Ajax request failed.');
+    });
+
+    function renderCharts(monthlyData, disciplinesData) {
+        var monthlyCtx = document.getElementById('monthly-chart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'bar',
+            data: {
+                labels: monthlyData.labels,
+                datasets: [{
+                    label: 'درآمد',
+                    data: monthlyData.income,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)'
+                }, {
+                    label: 'هزینه',
+                    data: monthlyData.expense,
+                    backgroundColor: 'rgba(220, 53, 69, 0.8)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {beginAtZero: true}
+                }
+            }
+        });
+
+        var disciplinesCtx = document.getElementById('disciplines-chart').getContext('2d');
+        new Chart(disciplinesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: disciplinesData.labels,
+                datasets: [{
+                    data: disciplinesData.counts,
+                    backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                }]
+            },
+            options: {responsive: true}
+        });
+    }
 });

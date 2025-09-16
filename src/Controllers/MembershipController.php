@@ -30,6 +30,12 @@ class MembershipController
                            class="regular-text"/></td>
             </tr>
             <tr>
+                <th><label for="phone_number">شماره تماس</label></th>
+                <td><input type="text" name="phone_number" id="phone_number"
+                           value="<?php echo esc_attr(get_the_author_meta('phone_number', $user->ID)); ?>"
+                           class="regular-text"/></td>
+            </tr>
+            <tr>
                 <th><label for="sport_discipline">رشته ورزشی</label></th>
                 <td>
                     <select name="sport_discipline" id="sport_discipline">
@@ -115,6 +121,7 @@ class MembershipController
         }
 
         update_user_meta($user_id, 'national_id', sanitize_text_field($_POST['national_id']));
+        update_user_meta($user_id, 'phone_number', sanitize_text_field($_POST['phone_number']));
         update_user_meta($user_id, 'sport_discipline', sanitize_text_field($_POST['sport_discipline']));
         update_user_meta($user_id, 'payment_type', sanitize_text_field($_POST['payment_type']));
 
@@ -129,6 +136,27 @@ class MembershipController
             delete_user_meta($user_id, 'total_amount');
             delete_user_meta($user_id, 'installment_count');
             $this->delete_all_installments($user_id);
+        }
+    }
+
+    private function get_installments_for_user($user_id)
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'gym_installments';
+        return $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY due_date ASC", $user_id));
+    }
+
+    private function get_installment_status_label($status)
+    {
+        switch ($status) {
+            case 'paid':
+                return 'پرداخت شده';
+            case 'pending':
+                return 'در انتظار';
+            case 'overdue':
+                return 'معوق';
+            default:
+                return 'نامشخص';
         }
     }
 
@@ -162,26 +190,5 @@ class MembershipController
         global $wpdb;
         $table_name = $wpdb->prefix . 'gym_installments';
         $wpdb->delete($table_name, ['user_id' => $user_id]);
-    }
-
-    private function get_installments_for_user($user_id)
-    {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'gym_installments';
-        return $wpdb->get_results($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d ORDER BY due_date ASC", $user_id));
-    }
-
-    private function get_installment_status_label($status)
-    {
-        switch ($status) {
-            case 'paid':
-                return 'پرداخت شده';
-            case 'pending':
-                return 'در انتظار';
-            case 'overdue':
-                return 'معوق';
-            default:
-                return 'نامشخص';
-        }
     }
 }

@@ -46,7 +46,7 @@
 
     <h2>گزارش فروش بوفه</h2>
     <?php
-    $sales = get_posts(array('post_type' => 'buffet_sale', 'numberposts' => 10));
+    $sales = get_posts(array('post_type' => 'buffet_sale', 'numberposts' => 10, 'orderby' => 'date', 'order' => 'DESC'));
     ?>
     <table class="widefat fixed striped">
         <thead>
@@ -59,22 +59,28 @@
         </tr>
         </thead>
         <tbody>
-        <?php foreach ($sales as $sale): ?>
-            <?php
-            $product_id = get_post_meta($sale->ID, 'product_id', true);
-            $quantity = get_post_meta($sale->ID, 'quantity', true);
-            $price = get_post_meta($sale->ID, 'price', true);
-            $customer_name = get_post_meta($sale->ID, 'customer_name', true);
-            $product_title = get_the_title($product_id);
-            ?>
+        <?php if (!empty($sales)) : ?>
+            <?php foreach ($sales as $sale): ?>
+                <?php
+                $product_id = get_post_meta($sale->ID, 'product_id', true);
+                $quantity = get_post_meta($sale->ID, 'quantity', true);
+                $price = get_post_meta($sale->ID, 'price', true);
+                $customer_name = get_post_meta($sale->ID, 'customer_name', true);
+                $product_title = get_the_title($product_id);
+                ?>
+                <tr>
+                    <td><?php echo esc_html($product_title); ?></td>
+                    <td><?php echo esc_html($quantity); ?></td>
+                    <td><?php echo number_format(floatval($price)); ?> تومان</td>
+                    <td><?php echo esc_html($customer_name ?: 'نامشخص'); ?></td>
+                    <td><?php echo esc_html($sale->post_date); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else : ?>
             <tr>
-                <td><?php echo esc_html($product_title); ?></td>
-                <td><?php echo esc_html($quantity); ?></td>
-                <td><?php echo number_format($price); ?> تومان</td>
-                <td><?php echo esc_html($customer_name ?: 'نامشخص'); ?></td>
-                <td><?php echo esc_html($sale->post_date); ?></td>
+                <td colspan="5">هیچ فروشی ثبت نشده است.</td>
             </tr>
-        <?php endforeach; ?>
+        <?php endif; ?>
         </tbody>
     </table>
 </div>

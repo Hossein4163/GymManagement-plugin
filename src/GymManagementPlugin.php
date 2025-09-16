@@ -39,9 +39,33 @@ class GymManagementPlugin
 
     private function define_hooks()
     {
-        register_activation_hook(MY_GYM_PLUGIN_PATH . 'my-gym-plugin.php', array($this, 'activate'));
-        register_deactivation_hook(MY_GYM_PLUGIN_PATH . 'my-gym-plugin.php', array($this, 'deactivate'));
+        register_activation_hook(MY_GYM_PLUGIN_PATH . 'rame-gym-management.php', array($this, 'activate'));
+        register_deactivation_hook(MY_GYM_PLUGIN_PATH . 'rame-gym-management.php', array($this, 'deactivate'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action('admin_menu', array($this, 'add_main_menu'));
+    }
+
+    public function add_main_menu()
+    {
+        add_menu_page(
+            'داشبورد Rame Gym',
+            'Rame Gym',
+            'manage_options',
+            'rame-gym',
+            array($this, 'render_dashboard_page'),
+            'dashicons-chart-bar',
+            6
+        );
+        add_submenu_page('rame-gym', 'مدیریت اعضا', 'اعضا', 'manage_options', 'users.php', null, 1);
+        add_submenu_page('rame-gym', 'مدیریت رشته‌ها', 'رشته‌ها', 'manage_options', 'edit.php?post_type=sports_discipline', null, 2);
+        add_submenu_page('rame-gym', 'مدیریت بوفه', 'بوفه', 'manage_options', 'my-gym-buffet', null, 3);
+        add_submenu_page('rame-gym', 'ارسال پیامک', 'پیامک', 'manage_options', 'my-gym-sms', null, 4);
+        add_submenu_page('rame-gym', 'مدیریت مالی', 'حسابداری', 'manage_options', 'my-gym-accounting', null, 5);
+    }
+
+    public function render_dashboard_page()
+    {
+        require_once MY_GYM_PLUGIN_PATH . 'views/dashboard-page.php';
     }
 
     public function activate()
@@ -57,9 +81,10 @@ class GymManagementPlugin
 
     public function enqueue_assets($hook)
     {
-        if (strpos($hook, 'my-gym') !== false || strpos($hook, 'users.php') !== false || $hook == 'post.php' || $hook == 'post-new.php') {
+        if (strpos($hook, 'rame-gym') !== false || strpos($hook, 'users.php') !== false || $hook == 'post.php' || $hook == 'post-new.php') {
             wp_enqueue_style('my-gym-admin-style', MY_GYM_PLUGIN_URL . 'assets/css/admin-style.css', array(), '1.0.0');
             wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), '1.0.0', true);
+            wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.0', true);
         }
     }
 }

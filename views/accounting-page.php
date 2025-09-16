@@ -13,21 +13,6 @@ $total_expense = 100000;
     <h1 class="wp-heading-inline">حسابداری باشگاه</h1>
     <hr class="wp-header-end">
 
-    <div class="dashboard-stats">
-        <div class="stat-box income">
-            <h3>درآمد کل</h3>
-            <p><?php echo number_format($total_income); ?> تومان</p>
-        </div>
-        <div class="stat-box expense">
-            <h3>هزینه‌ها</h3>
-            <p><?php echo number_format($total_expense); ?> تومان</p>
-        </div>
-        <div class="stat-box balance">
-            <h3>موجودی صندوق</h3>
-            <p><?php echo number_format($total_income - $total_expense); ?> تومان</p>
-        </div>
-    </div>
-
     <div class="postbox">
         <h2 class="hndle">ثبت تراکنش جدید</h2>
         <div class="inside">

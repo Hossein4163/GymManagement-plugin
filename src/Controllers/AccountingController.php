@@ -4,6 +4,7 @@ namespace GymManagement\Controllers;
 
 use GymManagement\Models\Transaction;
 use GymManagement\Models\Installment;
+use DateTime;
 
 class AccountingController
 {
@@ -12,18 +13,19 @@ class AccountingController
         add_action('admin_menu', array($this, 'add_accounting_menu'));
         add_action('init', array($this, 'create_tables'));
         add_action('wp_ajax_my_gym_pay_installment', array($this, 'ajax_pay_installment'));
+        add_action('wp_ajax_my_gym_get_dashboard_data', array($this, 'get_dashboard_data'));
     }
 
     public function add_accounting_menu()
     {
-        add_menu_page(
-            'حسابداری باشگاه',
+        add_submenu_page(
+            'rame-gym',
+            'حسابداری',
             'حسابداری',
             'manage_options',
             'my-gym-accounting',
             array($this, 'render_accounting_page'),
-            'dashicons-chart-pie',
-            7
+            null
         );
     }
 
@@ -111,5 +113,108 @@ class AccountingController
             return true;
         }
         return false;
+    }
+
+    public function get_dashboard_data()
+    {
+        check_ajax_referer('my-gym-security-nonce', 'security');
+
+        $data = array(
+            'income' => $this->get_total_income_this_month(),
+            'expense' => $this->get_total_expense_this_month(),
+            'overdue_installments' => $this->get_overdue_installments_count(),
+            'total_members' => count_users()->total_users,
+            'monthly_data' => $this->get_monthly_data(),
+            'disciplines_data' => $this->get_disciplines_data()
+        );
+        wp_send_json_success($data);
+    }
+
+    private function get_total_income_this_month()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'gym_transactions';
+        $year = date('Y');
+        $month = date('m');
+        return $wpdb->get_var("SELECT SUM(amount) FROM $table WHERE type = 'دریافت' AND YEAR(date) = $year AND MONTH(date) = $month");
+    }
+
+    private function get_total_expense_this_month()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'gym_transactions';
+        $year = date('Y');
+        $month = date('m');
+        return $wpdb->get_var("SELECT SUM(amount) FROM $table WHERE type = 'هزینه' AND YEAR(date) = $year AND MONTH(date) = $month");
+    }
+
+    private function get_overdue_installments_count()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'gym_installments';
+        return $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE status = 'overdue'");
+    }
+
+    private function get_monthly_data()
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'gym_transactions';
+        $current_year = date('Y');
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT MONTH(date) as month, SUM(CASE WHEN type='دریافت' THEN amount ELSE 0 END) as income, SUM(CASE WHEN type='هزینه' THEN amount ELSE 0 END) as expense
+                 FROM $table
+                 WHERE YEAR(date) = %d
+                 GROUP BY month
+                 ORDER BY month ASC",
+                $current_year
+            ), ARRAY_A
+        );
+
+        $labels = [];
+        $income = [];
+        $expense = [];
+        $months = range(1, 12);
+
+        foreach ($months as $month_num) {
+            $found = false;
+            foreach ($results as $row) {
+                if ($row['month'] == $month_num) {
+                    $labels[] = date('F', mktime(0, 0, 0, $month_num, 1));
+                    $income[] = floatval($row['income']);
+                    $expense[] = floatval($row['expense']);
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $labels[] = date('F', mktime(0, 0, 0, $month_num, 1));
+                $income[] = 0;
+                $expense[] = 0;
+            }
+        }
+
+        return ['labels' => $labels, 'income' => $income, 'expense' => $expense];
+    }
+
+    private function get_disciplines_data()
+    {
+        global $wpdb;
+        $users = get_users();
+        $disciplines = [];
+
+        foreach ($users as $user) {
+            $discipline_id = get_user_meta($user->ID, 'sport_discipline', true);
+            if ($discipline_id) {
+                $discipline_name = get_the_title($discipline_id);
+                if (!isset($disciplines[$discipline_name])) {
+                    $disciplines[$discipline_name] = 0;
+                }
+                $disciplines[$discipline_name]++;
+            }
+        }
+
+        return ['labels' => array_keys($disciplines), 'counts' => array_values($disciplines)];
     }
 }
