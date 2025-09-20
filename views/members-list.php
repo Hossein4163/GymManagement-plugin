@@ -40,7 +40,7 @@ class Members_List_Table extends WP_List_Table
             case 'coach_name':
                 return $item->$column_name;
             default:
-                return print_r($item, true); // برای اشکال‌زدایی
+                return print_r($item, true);
         }
     }
 
@@ -67,16 +67,16 @@ class Members_List_Table extends WP_List_Table
     <hr class="wp-header-end">
 
     <?php
-    $users = get_users(array('role__in' => array('subscriber'))); // دریافت کاربران
+    $users = get_users(array('role__in' => array('subscriber')));
     $members_data = [];
     foreach ($users as $user) {
         $members_data[] = (object)[
             'ID' => $user->ID,
             'display_name' => $user->display_name,
             'national_id' => get_user_meta($user->ID, 'national_id', true),
-            'sport_discipline' => get_user_meta($user->ID, 'sport_discipline', true),
-            'payment_amount' => get_user_meta($user->ID, 'payment_amount', true),
-            'coach_name' => get_user_meta($user->ID, 'coach_name', true),
+            'sport_discipline' => get_the_title(get_user_meta($user->ID, 'sport_discipline', true)),
+            'payment_amount' => number_format(floatval(get_user_meta($user->ID, 'total_amount', true))) . ' تومان',
+            'coach_name' => get_user_meta($user->ID, 'coach_name', true) ?: 'نامشخص',
         ];
     }
 

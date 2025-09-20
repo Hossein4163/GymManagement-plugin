@@ -86,11 +86,22 @@
     color: #fff;
 }
 .status-badge.paid {
-    background-color: #28a745; /* سبز */
+    background-color: #28a745;
 }
 .status-badge.pending {
-    background-color: #ffc107; /* زرد */
+    background-color: #ffc107;
 }
 .status-badge.overdue {
-    background-color: #dc3545; /* قرمز */
+    background-color: #dc3545;
+}
+
+/* استایل برای فیلتر گزارش */
+.report-filter {
+    margin-bottom: 20px;
+}
+.report-filter label {
+    margin-left: 10px;
+}
+.report-filter input[type="date"] {
+    margin-left: 5px;
 }

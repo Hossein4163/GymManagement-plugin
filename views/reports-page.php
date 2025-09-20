@@ -2,6 +2,17 @@
     <h1 class="wp-heading-inline">گزارشات مالی</h1>
     <hr class="wp-header-end">
 
+    <div class="report-filter">
+        <form id="report-filter-form">
+            <?php wp_nonce_field('my_gym_security_nonce', 'my_gym_security_nonce'); ?>
+            <label for="start_date">از تاریخ:</label>
+            <input type="date" id="start_date" name="start_date" value="<?php echo date('Y-m-01'); ?>">
+            <label for="end_date">تا تاریخ:</label>
+            <input type="date" id="end_date" name="end_date" value="<?php echo date('Y-m-t'); ?>">
+            <input type="submit" class="button button-primary" value="فیلتر گزارش‌ها">
+        </form>
+    </div>
+
     <div class="dashboard-charts">
         <div class="chart-box">
             <h2>گزارش سود و زیان</h2>
@@ -15,18 +26,6 @@
 </div>
 <script>
     jQuery(document).ready(function ($) {
-        var reportData = {
-            'action': 'my_gym_get_financial_reports',
-            'security': '<?php echo wp_create_nonce('my-gym-security-nonce'); ?>'
-        };
-
-        $.post(ajaxurl, reportData, function (response) {
-            if (response.success) {
-                renderProfitLossChart(response.data.profit_and_loss);
-                renderDisciplineIncomeChart(response.data.discipline_income);
-            }
-        });
-
         function renderProfitLossChart(data) {
             var labels = data.map(item => item.year + '-' + item.month);
             var income = data.map(item => item.income);
@@ -63,5 +62,19 @@
                 options: {responsive: true}
             });
         }
+
+        var reportData = {
+            'action': 'my_gym_get_financial_reports',
+            'security': my_gym_security_nonce,
+            'start_date': $('#start_date').val(),
+            'end_date': $('#end_date').val()
+        };
+
+        $.post(ajaxurl, reportData, function (response) {
+            if (response.success) {
+                renderProfitLossChart(response.data.profit_and_loss);
+                renderDisciplineIncomeChart(response.data.discipline_income);
+            }
+        });
     });
 </script>

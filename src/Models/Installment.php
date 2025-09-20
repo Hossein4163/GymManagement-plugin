@@ -9,7 +9,7 @@ class Installment
     public $amount;
     public $due_date;
     public $payment_date;
-    public $status; // 'pending', 'paid', 'overdue'
+    public $status;
 
     public function __construct($data = [])
     {

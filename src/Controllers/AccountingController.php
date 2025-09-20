@@ -10,23 +10,11 @@ class AccountingController
 {
     public function __construct()
     {
-        add_action('admin_menu', array($this, 'add_accounting_menu'));
+        // Remove menu registration from constructor
         add_action('init', array($this, 'create_tables'));
         add_action('wp_ajax_my_gym_pay_installment', array($this, 'ajax_pay_installment'));
         add_action('wp_ajax_my_gym_get_dashboard_data', array($this, 'get_dashboard_data'));
-    }
-
-    public function add_accounting_menu()
-    {
-        add_submenu_page(
-            'rame-gym',
-            'حسابداری',
-            'حسابداری',
-            'manage_options',
-            'my-gym-accounting',
-            array($this, 'render_accounting_page'),
-            null
-        );
+        add_action('admin_init', array($this, 'process_transaction'));
     }
 
     public function create_tables()
@@ -44,7 +32,9 @@ class AccountingController
             payment_type varchar(50) NOT NULL,
             description text,
             date datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            INDEX user_id (user_id),
+            INDEX date (date)
         ) $charset_collate;";
 
         $sql2 = "CREATE TABLE $installments_table (
@@ -54,7 +44,8 @@ class AccountingController
             due_date date NOT NULL,
             payment_date datetime DEFAULT NULL,
             status varchar(50) NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            INDEX user_id (user_id)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -64,95 +55,119 @@ class AccountingController
 
     public function render_accounting_page()
     {
+        // Check user permissions
+        if (!current_user_can('manage_options')) {
+            wp_die(__('شما اجازه دسترسی به این صفحه را ندارید.'));
+        }
+
         require_once MY_GYM_PLUGIN_PATH . 'views/accounting-page.php';
+    }
+
+    public function process_transaction()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_transaction']) && check_admin_referer('my_gym_transaction_nonce')) {
+            // Check user permissions
+            if (!current_user_can('manage_options')) {
+                return;
+            }
+
+            $transaction_type = sanitize_text_field($_POST['transaction_type']);
+            $amount = floatval($_POST['amount']);
+            $payment_method = sanitize_text_field($_POST['payment_method']);
+            $description = sanitize_textarea_field($_POST['description']);
+            $user_id = get_current_user_id();
+
+            if ($amount <= 0) {
+                add_settings_error('my_gym_messages', 'invalid_amount', 'مبلغ نامعتبر است.', 'error');
+                return;
+            }
+
+            $this->create_transaction($user_id, $amount, $transaction_type === 'income' ? 'دریافت' : 'هزینه', $payment_method, $description);
+            add_settings_error('my_gym_messages', 'transaction_added', 'تراکنش با موفقیت ثبت شد.', 'success');
+        }
+    }
+
+    public function create_transaction($user_id, $amount, $type, $payment_type, $description)
+    {
+        global $wpdb;
+        $table = $wpdb->prefix . 'gym_transactions';
+
+        return $wpdb->insert(
+            $table,
+            [
+                'user_id' => $user_id,
+                'amount' => $amount,
+                'type' => $type,
+                'payment_type' => $payment_type,
+                'description' => $description,
+                'date' => current_time('mysql')
+            ],
+            [
+                '%d',
+                '%f',
+                '%s',
+                '%s',
+                '%s',
+                '%s'
+            ]
+        );
     }
 
     public function ajax_pay_installment()
     {
         check_ajax_referer('my-gym-security-nonce', 'security');
-
         if (!current_user_can('manage_options')) {
-            wp_die('شما اجازه دسترسی به این بخش را ندارید.');
+            wp_send_json_error('عدم دسترسی.');
         }
 
-        $installment_id = isset($_POST['installment_id']) ? intval($_POST['installment_id']) : 0;
-        if ($installment_id > 0) {
-            $this->process_installment_payment($installment_id);
-            wp_send_json_success('پرداخت قسط با موفقیت ثبت شد.');
-        }
-
-        wp_die();
-    }
-
-    public function process_installment_payment($installment_id)
-    {
+        $installment_id = intval($_POST['installment_id']);
         global $wpdb;
-        $installments_table = $wpdb->prefix . 'gym_installments';
-        $transactions_table = $wpdb->prefix . 'gym_transactions';
-
-        $installment = $wpdb->get_row($wpdb->prepare("SELECT * FROM $installments_table WHERE id = %d", $installment_id));
+        $table = $wpdb->prefix . 'gym_installments';
+        $installment = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $installment_id));
 
         if ($installment && $installment->status !== 'paid') {
             $wpdb->update(
-                $installments_table,
+                $table,
                 ['status' => 'paid', 'payment_date' => current_time('mysql')],
-                ['id' => $installment_id]
+                ['id' => $installment_id],
+                ['%s', '%s'],
+                ['%d']
             );
-
-            $wpdb->insert(
-                $transactions_table,
-                [
-                    'user_id' => $installment->user_id,
-                    'amount' => $installment->amount,
-                    'type' => 'دریافت',
-                    'payment_type' => 'اقساط',
-                    'description' => 'پرداخت قسط',
-                    'date' => current_time('mysql')
-                ]
-            );
-            return true;
+            $this->create_transaction($installment->user_id, $installment->amount, 'دریافت', 'نقدی', 'پرداخت قسط');
+            wp_send_json_success('پرداخت ثبت شد.');
+        } else {
+            wp_send_json_error('قسط نامعتبر یا قبلاً پرداخت شده است.');
         }
-        return false;
     }
 
     public function get_dashboard_data()
     {
         check_ajax_referer('my-gym-security-nonce', 'security');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('عدم دسترسی.');
+        }
 
-        $data = array(
-            'income' => $this->get_total_income_this_month(),
-            'expense' => $this->get_total_expense_this_month(),
-            'overdue_installments' => $this->get_overdue_installments_count(),
-            'total_members' => count_users()->total_users,
+        $transient_key = 'my_gym_dashboard_data';
+        $cached_data = get_transient($transient_key);
+        if ($cached_data !== false) {
+            wp_send_json_success($cached_data);
+        }
+
+        global $wpdb;
+        $transactions_table = $wpdb->prefix . 'gym_transactions';
+        $installments_table = $wpdb->prefix . 'gym_installments';
+
+        $data = [
+            'income' => floatval($wpdb->get_var("SELECT SUM(amount) FROM $transactions_table WHERE type = 'دریافت' AND MONTH(date) = MONTH(CURRENT_DATE)")),
+            'expense' => floatval($wpdb->get_var("SELECT SUM(amount) FROM $transactions_table WHERE type = 'هزینه' AND MONTH(date) = MONTH(CURRENT_DATE)")),
+            'overdue_installments' => intval($wpdb->get_var("SELECT COUNT(*) FROM $installments_table WHERE status = 'overdue'")),
+            'total_members' => count(get_users(['role__in' => ['subscriber']])),
             'monthly_data' => $this->get_monthly_data(),
             'disciplines_data' => $this->get_disciplines_data()
-        );
+        ];
+
+        set_transient($transient_key, $data, HOUR_IN_SECONDS);
         wp_send_json_success($data);
-    }
-
-    private function get_total_income_this_month()
-    {
-        global $wpdb;
-        $table = $wpdb->prefix . 'gym_transactions';
-        $year = date('Y');
-        $month = date('m');
-        return $wpdb->get_var("SELECT SUM(amount) FROM $table WHERE type = 'دریافت' AND YEAR(date) = $year AND MONTH(date) = $month");
-    }
-
-    private function get_total_expense_this_month()
-    {
-        global $wpdb;
-        $table = $wpdb->prefix . 'gym_transactions';
-        $year = date('Y');
-        $month = date('m');
-        return $wpdb->get_var("SELECT SUM(amount) FROM $table WHERE type = 'هزینه' AND YEAR(date) = $year AND MONTH(date) = $month");
-    }
-
-    private function get_overdue_installments_count()
-    {
-        global $wpdb;
-        $table = $wpdb->prefix . 'gym_installments';
-        return $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE status = 'overdue'");
     }
 
     private function get_monthly_data()
@@ -200,18 +215,19 @@ class AccountingController
 
     private function get_disciplines_data()
     {
-        global $wpdb;
-        $users = get_users();
+        $users = get_users(['role__in' => ['subscriber']]);
         $disciplines = [];
 
         foreach ($users as $user) {
             $discipline_id = get_user_meta($user->ID, 'sport_discipline', true);
             if ($discipline_id) {
                 $discipline_name = get_the_title($discipline_id);
-                if (!isset($disciplines[$discipline_name])) {
-                    $disciplines[$discipline_name] = 0;
+                if ($discipline_name && $discipline_name !== 'Auto Draft') {
+                    if (!isset($disciplines[$discipline_name])) {
+                        $disciplines[$discipline_name] = 0;
+                    }
+                    $disciplines[$discipline_name]++;
                 }
-                $disciplines[$discipline_name]++;
             }
         }
 

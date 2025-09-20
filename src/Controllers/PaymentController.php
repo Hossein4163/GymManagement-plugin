@@ -1,8 +1,8 @@
 <?php
 
-namespace MyGym\Controllers;
+namespace GymManagement\Controllers;
 
-use MyGym\Models\Transaction;
+use GymManagement\Models\Transaction;
 
 class PaymentController
 {
@@ -19,7 +19,7 @@ class PaymentController
 
     public function ajax_process_payment()
     {
-        // اطلاعات از فرم پرداخت دریافت می‌شود
+        check_ajax_referer('my_gym_payment_nonce', 'security');
         $amount = isset($_POST['amount']) ? floatval($_POST['amount']) : 0;
         $description = isset($_POST['description']) ? sanitize_text_field($_POST['description']) : 'پرداخت شهریه باشگاه';
         $user_id = get_current_user_id();

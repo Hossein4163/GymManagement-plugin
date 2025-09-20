@@ -48,8 +48,9 @@
         <h3>اطلاعات شخصی</h3>
         <ul>
             <li><strong>نام:</strong> <?php echo esc_html($member->display_name); ?></li>
-            <li><strong>شماره تماس:</strong> <?php echo esc_html($member->phone_number); ?></li>
-            <li><strong>رشته ورزشی:</strong> <?php echo esc_html(get_the_title($member->sport_discipline)); ?></li>
+            <li><strong>شماره تماس:</strong> <?php echo esc_html($member->phone_number ?: 'ثبت نشده'); ?></li>
+            <li><strong>رشته
+                    ورزشی:</strong> <?php echo esc_html(get_the_title($member->sport_discipline) ?: 'ثبت نشده'); ?></li>
         </ul>
     </div>
 
@@ -69,15 +70,15 @@
                 </thead>
                 <tbody>
                 <?php
-                $installments = (new \MyGym\Controllers\MembershipController())->get_installments_for_user($member->user_id);
+                $installments = (new \GymManagement\Controllers\MembershipController())->get_installments_for_user($member->user_id);
                 foreach ($installments as $installment):
                     ?>
                     <tr>
-                        <td><?php echo number_format($installment->amount); ?> تومان</td>
+                        <td><?php echo number_format($installment->amount, 2); ?> تومان</td>
                         <td><?php echo esc_html($installment->due_date); ?></td>
                         <td>
                             <span class="status-badge <?php echo esc_attr($installment->status); ?>">
-                                <?php echo esc_html((new \MyGym\Controllers\MembershipController())->get_installment_status_label($installment->status)); ?>
+                                <?php echo esc_html((new \GymManagement\Controllers\MembershipController())->get_installment_status_label($installment->status)); ?>
                             </span>
                         </td>
                     </tr>

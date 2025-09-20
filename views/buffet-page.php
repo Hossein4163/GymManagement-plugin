@@ -2,10 +2,13 @@
     <h1 class="wp-heading-inline">مدیریت بوفه</h1>
     <hr class="wp-header-end">
 
+    <?php settings_errors('my_gym_messages'); ?>
+
     <div class="postbox">
         <h2 class="hndle">ثبت فروش جدید</h2>
         <div class="inside">
             <form action="" method="post">
+                <?php wp_nonce_field('my_gym_buffet_sale_nonce', 'my_gym_buffet_sale_nonce'); ?>
                 <table class="form-table">
                     <tr>
                         <th><label for="product_id">محصول</label></th>
@@ -13,13 +16,12 @@
                             <?php
                             $products = get_posts(array('post_type' => 'buffet_product', 'numberposts' => -1));
                             ?>
-                            <select name="product_id" id="product_id">
+                            <select name="product_id" id="product_id" required>
                                 <option value="">انتخاب محصول</option>
-                                <?php
-                                foreach ($products as $product) {
-                                    echo '<option value="' . esc_attr($product->ID) . '">' . esc_html($product->post_title) . '</option>';
-                                }
-                                ?>
+                                <?php foreach ($products as $product) : ?>
+                                    <option
+                                        value="<?php echo esc_attr($product->ID); ?>"><?php echo esc_html($product->post_title); ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </td>
                     </tr>
@@ -30,7 +32,8 @@
                     </tr>
                     <tr>
                         <th><label for="sale_price">مبلغ فروش (تومان)</label></th>
-                        <td><input type="number" name="sale_price" id="sale_price" required class="regular-text"></td>
+                        <td><input type="number" name="sale_price" id="sale_price" required class="regular-text" min="0"
+                                   step="0.01"></td>
                     </tr>
                     <tr>
                         <th><label for="customer_name">نام مشتری</label></th>
@@ -69,9 +72,9 @@
                 $product_title = get_the_title($product_id);
                 ?>
                 <tr>
-                    <td><?php echo esc_html($product_title); ?></td>
+                    <td><?php echo esc_html($product_title ?: 'نامشخص'); ?></td>
                     <td><?php echo esc_html($quantity); ?></td>
-                    <td><?php echo number_format(floatval($price)); ?> تومان</td>
+                    <td><?php echo number_format(floatval($price), 2); ?> تومان</td>
                     <td><?php echo esc_html($customer_name ?: 'نامشخص'); ?></td>
                     <td><?php echo esc_html($sale->post_date); ?></td>
                 </tr>

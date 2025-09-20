@@ -1,5 +1,4 @@
 jQuery(document).ready(function ($) {
-    // نمایش یا پنهان کردن فیلدهای اقساطی
     var paymentTypeSelect = $('#payment_type');
     var totalAmountField = $('#total_amount_field');
     var installmentCountField = $('#installment_count_field');
@@ -16,7 +15,6 @@ jQuery(document).ready(function ($) {
 
     paymentTypeSelect.trigger('change');
 
-    // اعتبارسنجی ساده فرم قبل از ارسال
     $('#submit_transaction').on('click', function (e) {
         var amount = $('#amount').val();
         if (amount <= 0 || amount === '') {
@@ -25,14 +23,13 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // مدیریت AJAX برای ثبت پرداخت قسط
     $('.pay-installment-btn').on('click', function (e) {
         e.preventDefault();
         var button = $(this);
         var installmentId = button.data('id');
         var data = {
             'action': 'my_gym_pay_installment',
-            'security': '<?php echo wp_create_nonce('my-gym - security - nonce'); ?>',
+            'security': my_gym_security_nonce,
             'installment_id': installmentId
         };
 
@@ -52,7 +49,6 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // نمایش/پنهان کردن فیلدهای شماره دستی در صفحه پیامک
     var recipientGroup = $('#recipient_group');
     var manualNumbersRow = $('#manual_numbers_row');
 
@@ -65,10 +61,9 @@ jQuery(document).ready(function ($) {
     });
     recipientGroup.trigger('change');
 
-    // Ajax برای بارگذاری آمار داشبورد
     var dashboardData = {
         'action': 'my_gym_get_dashboard_data',
-        'security': '<?php echo wp_create_nonce('my-gym - security - nonce'); ?>'
+        'security': my_gym_security_nonce
     };
 
     $.post(ajaxurl, dashboardData, function (response) {
@@ -123,4 +118,21 @@ jQuery(document).ready(function ($) {
             options: {responsive: true}
         });
     }
+
+    $('#report-filter-form').on('submit', function (e) {
+        e.preventDefault();
+        var reportData = {
+            'action': 'my_gym_get_financial_reports',
+            'security': my_gym_security_nonce,
+            'start_date': $('#start_date').val(),
+            'end_date': $('#end_date').val()
+        };
+
+        $.post(ajaxurl, reportData, function (response) {
+            if (response.success) {
+                renderProfitLossChart(response.data.profit_and_loss);
+                renderDisciplineIncomeChart(response.data.discipline_income);
+            }
+        });
+    });
 });

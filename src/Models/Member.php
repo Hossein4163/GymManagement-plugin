@@ -1,6 +1,6 @@
 <?php
 
-namespace MyGym\Models;
+namespace GymManagement\Models;
 
 class Member
 {

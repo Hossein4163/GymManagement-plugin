@@ -2,11 +2,13 @@
 /**
  * Plugin Name:       Rame Gym Accounting
  * Description:       A comprehensive accounting plugin for managing a sports club.
- * Version:           1.0.0
+ * Version:           1.0.2
  * Author:            RameStudio
  * Author URI:        https://ramestudio.com/
  * License:           GPLv2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       rame-gym
+ * Domain Path:       /languages
  */
 
 if (!defined('ABSPATH')) {
