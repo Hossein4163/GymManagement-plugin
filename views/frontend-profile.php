@@ -1,6 +1,11 @@
 <?php
-// این فایل در داخل متد render_user_profile لود می‌شود.
-// متغیر $member در دسترس است.
+if (!is_user_logged_in()) {
+    return '<p>لطفاً ابتدا وارد حساب کاربری خود شوید.</p>';
+}
+
+$user_id = get_current_user_id();
+$member = new \GymManagement\Models\Member($user_id);
+$membership_controller = new \GymManagement\Controllers\MembershipController();
 ?>
 <style>
     .rame-profile-container {
@@ -70,7 +75,7 @@
                 </thead>
                 <tbody>
                 <?php
-                $installments = (new \GymManagement\Controllers\MembershipController())->get_installments_for_user($member->user_id);
+                $installments = $membership_controller->get_installments_for_user($member->user_id);
                 foreach ($installments as $installment):
                     ?>
                     <tr>
@@ -78,7 +83,7 @@
                         <td><?php echo esc_html($installment->due_date); ?></td>
                         <td>
                             <span class="status-badge <?php echo esc_attr($installment->status); ?>">
-                                <?php echo esc_html((new \GymManagement\Controllers\MembershipController())->get_installment_status_label($installment->status)); ?>
+                                <?php echo esc_html($membership_controller->get_installment_status_label($installment->status)); ?>
                             </span>
                         </td>
                     </tr>

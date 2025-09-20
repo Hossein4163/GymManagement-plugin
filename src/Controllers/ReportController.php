@@ -1,4 +1,5 @@
 <?php
+// src/Controllers/ReportController.php
 
 namespace GymManagement\Controllers;
 
@@ -19,6 +20,9 @@ class ReportController
 
     public function render_reports_page()
     {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('شما اجازه دسترسی به این صفحه را ندارید.'));
+        }
         require_once MY_GYM_PLUGIN_PATH . 'views/reports-page.php';
     }
 

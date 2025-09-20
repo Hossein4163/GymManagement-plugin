@@ -1,4 +1,5 @@
 <?php
+// src/Controllers/AccountingController.php
 
 namespace GymManagement\Controllers;
 
@@ -10,7 +11,6 @@ class AccountingController
 {
     public function __construct()
     {
-        // Remove menu registration from constructor
         add_action('init', array($this, 'create_tables'));
         add_action('wp_ajax_my_gym_pay_installment', array($this, 'ajax_pay_installment'));
         add_action('wp_ajax_my_gym_get_dashboard_data', array($this, 'get_dashboard_data'));
@@ -55,19 +55,16 @@ class AccountingController
 
     public function render_accounting_page()
     {
-        // Check user permissions
         if (!current_user_can('manage_options')) {
             wp_die(__('شما اجازه دسترسی به این صفحه را ندارید.'));
         }
-
         require_once MY_GYM_PLUGIN_PATH . 'views/accounting-page.php';
     }
 
     public function process_transaction()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_transaction']) && check_admin_referer('my_gym_transaction_nonce')) {
-            // Check user permissions
-            if (!current_user_can('manage_options')) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_transaction'])) {
+            if (!current_user_can('manage_options') || !wp_verify_nonce($_POST['my_gym_transaction_nonce'], 'my_gym_transaction_nonce')) {
                 return;
             }
 
@@ -102,14 +99,7 @@ class AccountingController
                 'description' => $description,
                 'date' => current_time('mysql')
             ],
-            [
-                '%d',
-                '%f',
-                '%s',
-                '%s',
-                '%s',
-                '%s'
-            ]
+            ['%d', '%f', '%s', '%s', '%s', '%s']
         );
     }
 

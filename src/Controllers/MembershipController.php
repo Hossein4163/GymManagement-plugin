@@ -1,8 +1,10 @@
 <?php
+// src/Controllers/MembershipController.php
 
 namespace GymManagement\Controllers;
 
 use DateTime;
+use GymManagement\Models\Installment;
 
 class MembershipController
 {
@@ -12,6 +14,7 @@ class MembershipController
         add_action('edit_user_profile', array($this, 'add_member_fields'));
         add_action('personal_options_update', array($this, 'save_member_fields'));
         add_action('edit_user_profile_update', array($this, 'save_member_fields'));
+        add_action('wp_ajax_my_gym_get_all_users', array($this, 'ajax_get_all_users'));
     }
 
     public function add_member_fields($user)
@@ -38,7 +41,7 @@ class MembershipController
             <tr>
                 <th><label for="sport_discipline">رشته ورزشی</label></th>
                 <td>
-                    <select name="sport_discipline" id="sport_discipline">
+                    <select name="sport_discipline" id="sport_discipline" class="select2-searchable">
                         <option value="">انتخاب رشته</option>
                         <?php foreach ($disciplines as $discipline) : ?>
                             <option
@@ -91,7 +94,7 @@ class MembershipController
                             <tbody>
                             <?php foreach ($installments as $installment) : ?>
                                 <tr>
-                                    <td><?php echo number_format($installment->amount); ?> تومان</td>
+                                    <td><?php echo number_format($installment->amount, 2); ?> تومان</td>
                                     <td><?php echo esc_html($installment->due_date); ?></td>
                                     <td><span class="status-badge <?php echo esc_attr($installment->status); ?>">
                                             <?php echo esc_html($this->get_installment_status_label($installment->status)); ?>
@@ -206,5 +209,21 @@ class MembershipController
         global $wpdb;
         $table_name = $wpdb->prefix . 'gym_installments';
         $wpdb->delete($table_name, ['user_id' => $user_id]);
+    }
+
+    public function ajax_get_all_users()
+    {
+        check_ajax_referer('my_gym_security_nonce', 'security');
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('عدم دسترسی.');
+        }
+
+        $users = get_users(['role__in' => ['subscriber', 'administrator']]);
+        $formatted_users = [];
+        foreach ($users as $user) {
+            $formatted_users[] = ['id' => $user->ID, 'text' => $user->display_name];
+        }
+
+        wp_send_json_success($formatted_users);
     }
 }

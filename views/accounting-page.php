@@ -7,7 +7,7 @@ $total_expense = $wpdb->get_var("SELECT SUM(amount) FROM $transactions_table WHE
 ?>
 
 <div class="wrap my-gym-wrap">
-    <h1 class="wp-heading-inline">حسابداری باشگاه</h1>
+    <h1 class="wp-heading-inline">ثبت تراکنش‌ها</h1>
     <hr class="wp-header-end">
 
     <?php settings_errors('my_gym_messages'); ?>
@@ -29,8 +29,11 @@ $total_expense = $wpdb->get_var("SELECT SUM(amount) FROM $transactions_table WHE
                     </tr>
                     <tr>
                         <th><label for="amount">مبلغ (تومان)</label></th>
-                        <td><input type="number" name="amount" id="amount" required class="regular-text" min="0"
-                                   step="0.01"></td>
+                        <td>
+                            <input type="number" name="amount" id="amount" required class="regular-text" min="0"
+                                   step="1">
+                            <p id="formatted-amount-text" class="description"></p>
+                        </td>
                     </tr>
                     <tr>
                         <th><label for="payment_method">روش پرداخت</label></th>

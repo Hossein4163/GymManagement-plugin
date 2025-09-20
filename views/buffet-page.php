@@ -16,7 +16,7 @@
                             <?php
                             $products = get_posts(array('post_type' => 'buffet_product', 'numberposts' => -1));
                             ?>
-                            <select name="product_id" id="product_id" required>
+                            <select name="product_id" id="product_id" required class="select2-searchable">
                                 <option value="">انتخاب محصول</option>
                                 <?php foreach ($products as $product) : ?>
                                     <option
@@ -32,12 +32,33 @@
                     </tr>
                     <tr>
                         <th><label for="sale_price">مبلغ فروش (تومان)</label></th>
-                        <td><input type="number" name="sale_price" id="sale_price" required class="regular-text" min="0"
-                                   step="0.01"></td>
+                        <td>
+                            <input type="number" name="sale_price" id="sale_price" required class="regular-text" min="0"
+                                   step="1">
+                            <p id="formatted-sale-price-text" class="description"></p>
+                        </td>
                     </tr>
                     <tr>
-                        <th><label for="customer_name">نام مشتری</label></th>
-                        <td><input type="text" name="customer_name" id="customer_name" class="regular-text"></td>
+                        <th><label for="customer_id">مشتری</label></th>
+                        <td>
+                            <?php
+                            $users = get_users(array('role__in' => array('subscriber', 'administrator')));
+                            ?>
+                            <select name="customer_id" id="customer_id" class="select2-searchable">
+                                <option value="">انتخاب مشتری</option>
+                                <?php foreach ($users as $user) : ?>
+                                    <option
+                                        value="<?php echo esc_attr($user->ID); ?>"><?php echo esc_html($user->display_name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="button" id="add-new-customer-btn">افزودن مشتری جدید</button>
+                        </td>
+                    </tr>
+                    <tr id="new-customer-fields" style="display:none;">
+                        <th><label for="new_customer_name">نام مشتری جدید</label></th>
+                        <td>
+                            <input type="text" name="new_customer_name" id="new_customer_name" class="regular-text">
+                        </td>
                     </tr>
                 </table>
                 <p class="submit">

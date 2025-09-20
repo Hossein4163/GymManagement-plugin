@@ -1,4 +1,5 @@
 <?php
+// src/Controllers/SmsController.php
 
 namespace GymManagement\Controllers;
 
@@ -6,24 +7,34 @@ class SmsController
 {
     public function __construct()
     {
-        // Remove menu registration from constructor
+        add_action('admin_menu', array($this, 'add_sms_menu'));
         add_action('admin_init', array($this, 'process_sms'));
+    }
+
+    public function add_sms_menu()
+    {
+        add_submenu_page(
+            'rame-gym',
+            'ارسال پیامک',
+            'پیامک',
+            'manage_options',
+            'my-gym-sms',
+            array($this, 'render_sms_page'),
+            null
+        );
     }
 
     public function render_sms_page()
     {
-        // Check user permissions
         if (!current_user_can('manage_options')) {
             wp_die(__('شما اجازه دسترسی به این صفحه را ندارید.'));
         }
-
         require_once MY_GYM_PLUGIN_PATH . 'views/sms-page.php';
     }
 
     public function process_sms()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_sms']) && check_admin_referer('my_gym_sms_nonce')) {
-            // Check user permissions
             if (!current_user_can('manage_options')) {
                 return;
             }
@@ -79,17 +90,14 @@ class SmsController
                     }
                 }
             }
-
             add_settings_error('my_gym_messages', 'sms_sent', "پیامک به $success_count گیرنده با موفقیت ارسال شد.", 'success');
         }
     }
 
     private function send_sms($number, $message)
     {
-        // نمونه پیاده‌سازی فرضی با API پیامکی
-        // برای استفاده واقعی، باید API سرویس پیامکی (مثل کاوه‌نگار) را جایگزین کنید
         $api_url = 'https://api.sms-service.com/send';
-        $api_key = 'YOUR_SMS_API_KEY'; // جایگزین کنید
+        $api_key = 'YOUR_SMS_API_KEY';
 
         $data = [
             'api_key' => $api_key,
@@ -102,10 +110,6 @@ class SmsController
             'headers' => ['Content-Type' => 'application/json'],
             'timeout' => 30
         ]);
-
-        // For development/testing purposes, always return true
-        // Remove this line when implementing real SMS API
-        return true;
 
         return !is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200;
     }

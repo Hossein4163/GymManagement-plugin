@@ -1,6 +1,9 @@
 <?php
+// src/Controllers/FrontendController.php
 
 namespace GymManagement\Controllers;
+
+use GymManagement\Models\Member;
 
 class FrontendController
 {
@@ -16,7 +19,7 @@ class FrontendController
         }
 
         $user_id = get_current_user_id();
-        $member = new \GymManagement\Models\Member($user_id);
+        $member = new Member($user_id);
 
         ob_start();
         include MY_GYM_PLUGIN_PATH . 'views/frontend-profile.php';

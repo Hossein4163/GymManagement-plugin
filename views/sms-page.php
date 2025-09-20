@@ -60,23 +60,3 @@
         </div>
     </div>
 </div>
-
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        var recipientGroup = document.getElementById('recipient_group');
-        var manualRow = document.getElementById('manual_numbers_row');
-
-        function toggleManualNumbers() {
-            if (recipientGroup.value === 'manual') {
-                manualRow.style.display = 'table-row';
-                document.getElementById('manual_numbers').required = true;
-            } else {
-                manualRow.style.display = 'none';
-                document.getElementById('manual_numbers').required = false;
-            }
-        }
-
-        recipientGroup.addEventListener('change', toggleManualNumbers);
-        toggleManualNumbers(); // Check initial state
-    });
-</script>

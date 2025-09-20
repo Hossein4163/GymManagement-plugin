@@ -1,4 +1,5 @@
 <?php
+// src/Controllers/BuffetController.php
 
 namespace GymManagement\Controllers;
 
@@ -9,6 +10,7 @@ class BuffetController
         add_action('admin_menu', array($this, 'add_buffet_menu'));
         add_action('init', array($this, 'register_buffet_sale_cpt'));
         add_action('admin_init', array($this, 'process_buffet_sale'));
+        add_action('wp_ajax_my_gym_get_products', array($this, 'ajax_get_products'));
     }
 
     public function add_buffet_menu()
@@ -42,6 +44,9 @@ class BuffetController
 
     public function render_buffet_page()
     {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('شما اجازه دسترسی به این صفحه را ندارید.'));
+        }
         require_once MY_GYM_PLUGIN_PATH . 'views/buffet-page.php';
     }
 
@@ -52,6 +57,7 @@ class BuffetController
             $quantity = intval($_POST['quantity']);
             $sale_price = floatval($_POST['sale_price']);
             $customer_name = sanitize_text_field($_POST['customer_name'] ?: 'نامشخص');
+            $customer_id = intval($_POST['customer_id']);
 
             if ($product_id <= 0 || $quantity <= 0 || $sale_price <= 0) {
                 add_settings_error('my_gym_messages', 'invalid_sale', 'اطلاعات فروش نامعتبر است.', 'error');
@@ -75,6 +81,7 @@ class BuffetController
                 update_post_meta($post_id, 'quantity', $quantity);
                 update_post_meta($post_id, 'price', $sale_price);
                 update_post_meta($post_id, 'customer_name', $customer_name);
+                update_post_meta($post_id, 'customer_id', $customer_id);
 
                 if ($stock !== '') {
                     update_post_meta($product_id, 'stock', intval($stock) - $quantity);
