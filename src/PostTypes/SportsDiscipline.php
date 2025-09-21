@@ -10,6 +10,10 @@ class SportsDiscipline
         add_action('init', array($this, 'register'), 1); // Changed from 0 to 1
         add_action('add_meta_boxes', array($this, 'add_custom_meta_boxes'));
         add_action('save_post', array($this, 'save_custom_meta_fields'));
+
+        // Add custom columns to admin list table
+        add_filter('manage_sports_discipline_posts_columns', array($this, 'add_custom_columns'));
+        add_action('manage_sports_discipline_posts_custom_column', array($this, 'render_custom_column'), 10, 2);
     }
 
     public function register()
@@ -105,6 +109,32 @@ class SportsDiscipline
         }
         if (isset($_POST['price'])) {
             update_post_meta($post_id, 'price', sanitize_text_field($_POST['price']));
+        }
+    }
+
+    // Add custom columns to the admin list table
+    public function add_custom_columns($columns)
+    {
+        $columns['age_min'] = __('حداقل سن', 'rame-gym');
+        $columns['age_max'] = __('حداکثر سن', 'rame-gym');
+        $columns['price'] = __('قیمت شهریه (تومان)', 'rame-gym');
+        return $columns;
+    }
+
+    // Render the content for custom columns
+    public function render_custom_column($column, $post_id)
+    {
+        switch ($column) {
+            case 'age_min':
+                echo esc_html(get_post_meta($post_id, 'age_min', true) ?: '-');
+                break;
+            case 'age_max':
+                echo esc_html(get_post_meta($post_id, 'age_max', true) ?: '-');
+                break;
+            case 'price':
+                $price = get_post_meta($post_id, 'price', true);
+                echo esc_html(number_format($price, 0) ?: '-') . ' تومان';
+                break;
         }
     }
 }

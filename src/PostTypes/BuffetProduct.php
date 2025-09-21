@@ -38,6 +38,7 @@ class BuffetProduct
     public function render_meta_box($post)
     {
         $stock = get_post_meta($post->ID, 'stock', true);
+        $price = get_post_meta($post->ID, 'price', true);
         wp_nonce_field('buffet_product_nonce', 'buffet_product_nonce');
         ?>
         <table class="form-table">
@@ -45,6 +46,11 @@ class BuffetProduct
                 <th><label for="stock">موجودی</label></th>
                 <td><input type="number" name="stock" id="stock" value="<?php echo esc_attr($stock); ?>"
                            class="regular-text" min="0"/></td>
+            </tr>
+            <tr>
+                <th><label for="price">قیمت (تومان)</label></th>
+                <td><input type="number" name="price" id="price" value="<?php echo esc_attr($price); ?>"
+                           class="regular-text" min="0" step="0.01"/></td>
             </tr>
         </table>
         <?php
@@ -66,6 +72,9 @@ class BuffetProduct
 
         if (isset($_POST['stock'])) {
             update_post_meta($post_id, 'stock', sanitize_text_field($_POST['stock']));
+        }
+        if (isset($_POST['price'])) {
+            update_post_meta($post_id, 'price', sanitize_text_field($_POST['price']));
         }
     }
 }

@@ -13,6 +13,8 @@
     "description": "A comprehensive gym accounting plugin for WordPress.",
     "license": "GPL-2.0-or-later",
     "name": "ramestudio/rame-gym-management",
-    "require": {},
+    "require": {
+        "morilog/jalali": "^3.0"
+    },
     "type": "wordpress-plugin"
 }

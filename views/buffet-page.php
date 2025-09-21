@@ -4,6 +4,37 @@
 
     <?php settings_errors('my_gym_messages'); ?>
 
+    <h2>لیست محصولات</h2>
+    <?php
+    $products = get_posts(array('post_type' => 'buffet_product', 'numberposts' => -1));
+    ?>
+    <table class="widefat fixed striped">
+        <thead>
+        <tr>
+            <th>عنوان</th>
+            <th>موجودی</th>
+            <th>قیمت (تومان)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <?php if (!empty($products)) : ?>
+            <?php foreach ($products as $product) : ?>
+                <?php $stock = get_post_meta($product->ID, 'stock', true);
+                $price = get_post_meta($product->ID, 'price', true); ?>
+                <tr>
+                    <td><?php echo esc_html($product->post_title); ?></td>
+                    <td><?php echo esc_html($stock ?: '-'); ?></td>
+                    <td><?php echo number_format(floatval($price), 0); ?></td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <tr>
+                <td colspan="3">هیچ محصولی وجود ندارد.</td>
+            </tr>
+        <?php endif; ?>
+        </tbody>
+    </table>
+
     <div class="postbox">
         <h2 class="hndle">ثبت فروش جدید</h2>
         <div class="inside">
@@ -13,9 +44,6 @@
                     <tr>
                         <th><label for="product_id">محصول</label></th>
                         <td>
-                            <?php
-                            $products = get_posts(array('post_type' => 'buffet_product', 'numberposts' => -1));
-                            ?>
                             <select name="product_id" id="product_id" required class="select2-searchable">
                                 <option value="">انتخاب محصول</option>
                                 <?php foreach ($products as $product) : ?>
@@ -33,31 +61,22 @@
                     <tr>
                         <th><label for="sale_price">مبلغ فروش (تومان)</label></th>
                         <td>
-                            <input type="number" name="sale_price" id="sale_price" required class="regular-text" min="0"
-                                   step="1">
+                            <input type="number" name="sale_price" id="sale_price" readonly required
+                                   class="regular-text" min="0" step="1">
                             <p id="formatted-sale-price-text" class="description"></p>
                         </td>
                     </tr>
                     <tr>
                         <th><label for="customer_id">مشتری</label></th>
                         <td>
-                            <?php
-                            $users = get_users(array('role__in' => array('subscriber', 'administrator')));
-                            ?>
-                            <select name="customer_id" id="customer_id" class="select2-searchable">
+                            <?php $users = get_users(array('role__in' => array('subscriber'))); ?>
+                            <select name="customer_id" id="customer_id" required>
                                 <option value="">انتخاب مشتری</option>
                                 <?php foreach ($users as $user) : ?>
                                     <option
                                         value="<?php echo esc_attr($user->ID); ?>"><?php echo esc_html($user->display_name); ?></option>
                                 <?php endforeach; ?>
                             </select>
-                            <button type="button" class="button" id="add-new-customer-btn">افزودن مشتری جدید</button>
-                        </td>
-                    </tr>
-                    <tr id="new-customer-fields" style="display:none;">
-                        <th><label for="new_customer_name">نام مشتری جدید</label></th>
-                        <td>
-                            <input type="text" name="new_customer_name" id="new_customer_name" class="regular-text">
                         </td>
                     </tr>
                 </table>
@@ -67,6 +86,35 @@
             </form>
         </div>
     </div>
+
+    <!-- باقی گزارش فروش مانند قبل... -->
+
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+            function updateSalePrice() {
+                var productId = $('#product_id').val();
+                var quantity = parseInt($('#quantity').val()) || 1;
+                if (productId) {
+                    $.post(my_gym_vars.ajax_url, {
+                        action: 'my_gym_get_product_price',
+                        product_id: productId,
+                        security: my_gym_vars.security_nonce
+                    }, function (response) {
+                        if (response.success) {
+                            var total = response.data.price * quantity;
+                            $('#sale_price').val(total);
+                            $('#formatted-sale-price-text').text(new Intl.NumberFormat('fa-IR').format(total) + ' تومان');
+                        }
+                    });
+                } else {
+                    $('#sale_price').val(0);
+                    $('#formatted-sale-price-text').text('');
+                }
+            }
+
+            $('#product_id, #quantity').on('change', updateSalePrice);
+        });
+    </script>
 
     <h2>گزارش فروش بوفه</h2>
     <?php
