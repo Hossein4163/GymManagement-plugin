@@ -1,34 +1,49 @@
 <div class="wrap my-gym-wrap">
-    <h1 class="wp-heading-inline">داشبورد مدیریت باشگاه Rame</h1>
-    <hr class="wp-header-end">
-
-    <div class="dashboard-stats">
-        <div class="stat-box income">
-            <h3>درآمد ماه جاری</h3>
-            <p id="total-income">در حال بارگذاری...</p>
+    <div class="rame-gym-header">
+        <div class="rame-gym-header-icon">
+            <span class="dashicons dashicons-analytics"></span>
         </div>
-        <div class="stat-box expense">
-            <h3>هزینه‌های ماه جاری</h3>
-            <p id="total-expense">در حال بارگذاری...</p>
-        </div>
-        <div class="stat-box balance">
-            <h3>اقساط معوق</h3>
-            <p id="overdue-installments">در حال بارگذاری...</p>
-        </div>
-        <div class="stat-box members">
-            <h3>تعداد اعضا</h3>
-            <p id="total-members">در حال بارگذاری...</p>
+        <div class="rame-gym-header-title">
+            <h1><?php esc_html_e('داشبورد مدیریت Rame Gym', 'rame-gym'); ?></h1>
+            <p class="description"><?php esc_html_e('تحلیل جامع عملکرد باشگاه شما', 'rame-gym'); ?></p>
         </div>
     </div>
 
-    <div class="dashboard-charts">
-        <div class="chart-box">
-            <h2>درآمد و هزینه ماهانه</h2>
-            <canvas id="monthly-chart"></canvas>
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3><?php esc_html_e('درآمد ماه جاری', 'rame-gym'); ?></h3>
+            <p id="total-income" class="stat-income">--</p>
         </div>
-        <div class="chart-box">
-            <h2>توزیع رشته‌های ورزشی</h2>
-            <canvas id="disciplines-chart"></canvas>
+        <div class="stat-card">
+            <h3><?php esc_html_e('هزینه‌های ماه جاری', 'rame-gym'); ?></h3>
+            <p id="total-expense" class="stat-expense">--</p>
+        </div>
+        <div class="stat-card">
+            <h3><?php esc_html_e('اقساط معوق', 'rame-gym'); ?></h3>
+            <p id="overdue-installments" class="stat-overdue">--</p>
+        </div>
+        <div class="stat-card">
+            <h3><?php esc_html_e('اعضای فعال', 'rame-gym'); ?></h3>
+            <p id="total-members" class="stat-members">--</p>
+        </div>
+    </div>
+
+    <div class="dashboard-main-content">
+        <div class="main-chart-container">
+            <div class="postbox">
+                <h2 class="hndle"><?php esc_html_e('نمودار درآمد و هزینه ماهانه', 'rame-gym'); ?></h2>
+                <div class="inside">
+                    <canvas id="monthly-chart" height="150"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="side-chart-container">
+            <div class="postbox">
+                <h2 class="hndle"><?php esc_html_e('توزیع رشته‌های ورزشی', 'rame-gym'); ?></h2>
+                <div class="inside">
+                    <canvas id="disciplines-chart"></canvas>
+                </div>
+            </div>
         </div>
     </div>
 </div>

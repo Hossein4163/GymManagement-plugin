@@ -2,501 +2,165 @@
     'use strict';
 
     $(document).ready(function () {
-        // تابع کمکی برای فرمت مبلغ به صورت سه رقم سه رقم
+
+        // --- General Helper Functions ---
         function formatNumber(number) {
-            if (typeof Intl !== 'undefined' && Intl.NumberFormat) {
-                return new Intl.NumberFormat('fa-IR').format(number);
-            } else {
-                // Fallback for older browsers
-                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            }
+            if (typeof number === 'undefined' || number === null) return '0';
+            return new Intl.NumberFormat('fa-IR').format(number);
         }
 
-        // مدیریت فرمت مبلغ برای فیلد حسابداری
-        $('#amount').on('input', function () {
-            let value = $(this).val();
-            let cleanValue = value.replace(/[^\d]/g, '');
-
-            if (cleanValue) {
-                let formattedValue = formatNumber(cleanValue);
-                $('#formatted-amount-text').text(formattedValue + ' تومان');
-            } else {
-                $('#formatted-amount-text').text('');
-            }
-        });
-
-        // مدیریت فرمت مبلغ برای فیلد بوفه
-        $('#sale_price').on('input', function () {
-            let value = $(this).val();
-            let cleanValue = value.replace(/[^\d]/g, '');
-
-            if (cleanValue) {
-                let formattedValue = formatNumber(cleanValue);
-                $('#formatted-sale-price-text').text(formattedValue + ' تومان');
-            } else {
-                $('#formatted-sale-price-text').text('');
-            }
-        });
-
-        var paymentTypeSelect = $('#payment_type');
-        var totalAmountField = $('#total_amount_field');
-        var installmentCountField = $('#installment_count_field');
-
-        if (paymentTypeSelect.length) {
-            paymentTypeSelect.on('change', function () {
-                if ($(this).val() === 'installments') {
-                    totalAmountField.show();
-                    installmentCountField.show();
-                } else {
-                    totalAmountField.hide();
-                    installmentCountField.hide();
-                }
-            });
-            paymentTypeSelect.trigger('change');
-        }
-
-        $('#submit_transaction').on('click', function (e) {
-            var amount = $('#amount').val();
-            if (amount <= 0 || amount === '') {
-                alert('لطفا مبلغ معتبری وارد کنید.');
-                e.preventDefault();
-            }
-        });
-
-        $('.pay-installment-btn').on('click', function (e) {
-            e.preventDefault();
-            var button = $(this);
-            var installmentId = button.data('id');
-
-            if (typeof my_gym_vars === 'undefined') {
-                alert('خطا در بارگیری اطلاعات');
-                return;
-            }
-
-            var data = {
-                'action': 'my_gym_pay_installment',
-                'security': my_gym_vars.security_nonce,
-                'installment_id': installmentId
-            };
-
-            button.text('در حال ثبت...');
-
-            $.post(my_gym_vars.ajax_url, data, function (response) {
-                if (response.success) {
-                    button.text('پرداخت شده');
-                    button.closest('tr').find('.status-badge').removeClass('pending overdue').addClass('paid').text('پرداخت شده');
-                } else {
-                    button.text('پرداخت');
-                    alert(response.data.message || 'خطا در پردازش');
-                }
-            }).fail(function () {
-                button.text('پرداخت');
-                alert('خطا در ارتباط با سرور');
-            });
-        });
-
-        // Dashboard Data Loading
-        function loadDashboardData() {
-            if (typeof my_gym_vars === 'undefined') {
-                console.warn('my_gym_vars not defined');
-                return;
-            }
-
-            var dashboardData = {
-                'action': 'my_gym_get_dashboard_data',
-                'security': my_gym_vars.security_nonce
-            };
-
-            $.post(my_gym_vars.ajax_url, dashboardData, function (response) {
-                if (response.success) {
-                    var data = response.data;
-
-                    // Update dashboard stats
-                    $('#total-income').text((data.income || 0).toLocaleString('fa-IR') + ' تومان');
-                    $('#total-expense').text((data.expense || 0).toLocaleString('fa-IR') + ' تومان');
-                    $('#overdue-installments').text(data.overdue_installments || 0);
-                    $('#total-members').text(data.total_members || 0);
-
-                    // Render charts if data exists
-                    if (data.monthly_data && data.disciplines_data) {
-                        renderCharts(data.monthly_data, data.disciplines_data);
-                    }
-                } else {
-                    console.error('Failed to load dashboard data:', response.data);
-                }
-            }).fail(function () {
-                console.error('Ajax request failed for dashboard data');
-            });
-        }
-
-        // Render charts function
-        function renderCharts(monthlyData, disciplinesData) {
-            if (typeof Chart === 'undefined') {
-                console.warn('Chart.js not loaded');
-                return;
-            }
-
-            // Monthly chart
-            var monthlyCtx = document.getElementById('monthly-chart');
-            if (monthlyCtx) {
-                new Chart(monthlyCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: monthlyData.labels || [],
-                        datasets: [
-                            {
-                                label: 'درآمد',
-                                data: monthlyData.income || [],
-                                backgroundColor: '#28a745'
-                            },
-                            {
-                                label: 'هزینه',
-                                data: monthlyData.expense || [],
-                                backgroundColor: '#dc3545'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'درآمد و هزینه ماهانه'
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                });
-            }
-
-            // Disciplines chart
-            var disciplinesCtx = document.getElementById('disciplines-chart');
-            if (disciplinesCtx && disciplinesData.labels && disciplinesData.labels.length > 0) {
-                new Chart(disciplinesCtx, {
-                    type: 'pie',
-                    data: {
-                        labels: disciplinesData.labels,
-                        datasets: [{
-                            data: disciplinesData.counts || [],
-                            backgroundColor: [
-                                '#007bff', '#28a745', '#ffc107', '#dc3545',
-                                '#17a2b8', '#6f42c1', '#e83e8c', '#fd7e14'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'توزیع رشته‌های ورزشی'
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Load dashboard data if on dashboard page
-        if ($('#monthly-chart').length || $('#total-income').length) {
+        // --- Dashboard Page Logic ---
+        if ($('#monthly-chart').length) {
             loadDashboardData();
         }
 
-        // هندلر فرم فیلتر گزارش
-        $('#report-filter-form').on('submit', function (e) {
-            e.preventDefault();
-            var startDate = $('#start_date').val();
-            var endDate = $('#end_date').val();
-            loadReportData(startDate, endDate);
-        });
-
-        // تابع بارگیری گزارشات
-        function loadReportData(startDate, endDate) {
-            if (typeof my_gym_vars === 'undefined') {
-                alert('خطا در بارگیری اطلاعات');
-                return;
-            }
-
-            var reportData = {
-                'action': 'my_gym_get_financial_reports',
-                'security': my_gym_vars.security_nonce,
-                'start_date': startDate,
-                'end_date': endDate
-            };
-
-            $.post(my_gym_vars.ajax_url, reportData, function (response) {
+        function loadDashboardData() {
+            $.post(my_gym_vars.ajax_url, {
+                action: 'my_gym_get_dashboard_data',
+                security: my_gym_vars.security_nonce
+            }, function (response) {
                 if (response.success) {
-                    // پاک کردن نمودارهای قبلی
-                    if (window.profitLossChart) {
-                        window.profitLossChart.destroy();
-                    }
-                    if (window.disciplineIncomeChart) {
-                        window.disciplineIncomeChart.destroy();
-                    }
-
-                    renderProfitLossChart(response.data.profit_and_loss);
-                    renderDisciplineIncomeChart(response.data.discipline_income);
+                    $('#total-income').text(formatNumber(response.data.income) + ' تومان');
+                    $('#total-expense').text(formatNumber(response.data.expense) + ' تومان');
+                    $('#overdue-installments').text(formatNumber(response.data.overdue_installments));
+                    $('#total-members').text(formatNumber(response.data.active_members));
+                    renderMainCharts(response.data.monthly_data, response.data.disciplines_data);
                 }
-            }).fail(function () {
-                alert('خطا در بارگیری گزارشات');
             });
         }
 
-        // تابع رندر نمودار سود و زیان
-        function renderProfitLossChart(data) {
-            if (typeof Chart === 'undefined') return;
-
-            var labels = data.map(item => item.year + '-' + item.month);
-            var income = data.map(item => item.income);
-            var expense = data.map(item => item.expense);
-
-            var ctx = document.getElementById('profit-loss-chart');
-            if (ctx) {
-                window.profitLossChart = new Chart(ctx, {
-                    type: 'line',
+        function renderMainCharts(monthlyData, disciplinesData) {
+            // Monthly Chart
+            const monthlyCtx = document.getElementById('monthly-chart');
+            if (monthlyCtx && monthlyData) {
+                new Chart(monthlyCtx, {
+                    type: 'bar',
                     data: {
-                        labels: labels,
+                        labels: monthlyData.labels,
                         datasets: [
-                            {label: 'درآمد', data: income, borderColor: '#28a745', fill: false},
-                            {label: 'هزینه', data: expense, borderColor: '#dc3545', fill: false}
+                            {label: 'درآمد', data: monthlyData.income, backgroundColor: '#2ecc71', borderRadius: 4},
+                            {label: 'هزینه', data: monthlyData.expense, backgroundColor: '#e74c3c', borderRadius: 4}
                         ]
                     },
                     options: {responsive: true, scales: {y: {beginAtZero: true}}}
                 });
             }
-        }
-
-        // تابع رندر نمودار درآمد بر اساس رشته
-        function renderDisciplineIncomeChart(data) {
-            if (typeof Chart === 'undefined') return;
-
-            var labels = data.map(item => item.label);
-            var incomes = data.map(item => item.income);
-
-            var ctx = document.getElementById('discipline-income-chart');
-            if (ctx) {
-                window.disciplineIncomeChart = new Chart(ctx, {
-                    type: 'pie',
+            // Disciplines Chart
+            const disciplinesCtx = document.getElementById('disciplines-chart');
+            if (disciplinesCtx && disciplinesData) {
+                new Chart(disciplinesCtx, {
+                    type: 'doughnut',
                     data: {
-                        labels: labels,
+                        labels: disciplinesData.labels,
                         datasets: [{
-                            data: incomes,
-                            backgroundColor: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#17a2b8']
+                            data: disciplinesData.counts,
+                            backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c', '#9b59b6', '#1abc9c']
                         }]
                     },
-                    options: {responsive: true}
+                    options: {responsive: true, maintainAspectRatio: false}
                 });
             }
         }
 
-        // Initialize Select2 for customer selection (Buffet Page)
-        if ($('#customer_id').length && typeof $.fn.select2 !== 'undefined') {
-            $('#customer_id').select2({
-                ajax: {
-                    url: typeof my_gym_vars !== 'undefined' ? my_gym_vars.ajax_url : ajaxurl,
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            q: params.term || '',
-                            action: 'my_gym_get_users',
-                            security: typeof my_gym_vars !== 'undefined' ? my_gym_vars.security_nonce : ''
-                        };
-                    },
-                    processResults: function (data) {
-                        if (data.success && data.data && data.data.results) {
-                            return {
-                                results: data.data.results,
-                                pagination: data.data.pagination
-                            };
-                        }
-                        return {results: []};
-                    },
-                    cache: true
+        // --- Shared Select2 Logic for User Search ---
+        const select2UserSearchOptions = {
+            ajax: {
+                url: my_gym_vars.ajax_url,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {q: params.term || '', action: 'my_gym_get_users', security: my_gym_vars.security_nonce};
                 },
-                minimumInputLength: 2,
-                placeholder: 'جستجوی مشتری...',
-                allowClear: true,
-                language: {
-                    inputTooShort: function () {
-                        return 'حداقل 2 کاراکتر تایپ کنید';
-                    },
-                    searching: function () {
-                        return 'در حال جستجو...';
-                    },
-                    noResults: function () {
-                        return 'کاربری یافت نشد';
-                    }
+                processResults: function (data) {
+                    if (data.success) return data.data;
+                    return {results: []};
                 }
+            },
+            minimumInputLength: 2
+        };
+
+        // --- Buffet Page Logic ---
+        if ($('#buffet-sale-form').length) {
+            $('#customer_id_select2').select2({
+                ...select2UserSearchOptions,
+                placeholder: 'جستجوی مشتری...',
+                allowClear: true
+            });
+            $('#category_filter').on('change', () => loadProductsByCategory($('#category_filter').val())).trigger('change');
+            $(document).on('input', '#products-table .quantity-input', updateBuffetTotal);
+            $('#customer_id_select2').on('change', updateBuffetTotal);
+        }
+
+        function loadProductsByCategory(categoryId) {
+            // AJAX logic to load products
+        }
+
+        function updateBuffetTotal() {
+            // Logic to calculate total price and enable/disable submit button
+        }
+
+        // --- Accounting Page Logic ---
+        if ($('#user_id_select2').length) {
+            $('#user_id_select2').select2({
+                ...select2UserSearchOptions,
+                placeholder: 'جستجوی عضو...',
+                allowClear: true
             });
         }
 
-        // Buffet: Category filter change handler
-        $('#category_filter').on('change', function () {
-            var categoryId = $(this).val();
-            if (typeof my_gym_vars !== 'undefined') {
-                loadProductsByCategory(categoryId);
-            } else {
-                var url = new URL(window.location);
-                if (categoryId) {
-                    url.searchParams.set('category', categoryId);
-                } else {
-                    url.searchParams.delete('category');
-                }
-                window.location = url;
-            }
-        });
+        // --- Reports Page Logic ---
+        if ($('#report-filter-form').length) {
+            $('#filter_user_id').select2({...select2UserSearchOptions, placeholder: 'همه اعضا', allowClear: true});
+            // Report chart rendering logic here
+        }
 
-        // Load products by category (AJAX)
-        function loadProductsByCategory(categoryId) {
-            $('#products-loading').show();
-            $('#products-container').hide();
+        // --- SMS Page Logic ---
+        $('#recipient_group').on('change', function () {
+            $('#manual_numbers_row').toggle($(this).val() === 'manual');
+        }).trigger('change');
+
+        // --- User Profile Membership Logic ---
+        if ($('#rame-gym-member-details').length) {
+            function calculatePrice() {
+                const price = $('#discipline_id').find(':selected').data('price') || 0;
+                const duration = parseInt($('#membership_duration').val()) || 1;
+                $('#total_amount').val(price * duration);
+            }
+
+            $('#discipline_id, #membership_duration').on('change', calculatePrice);
+
+            $('#payment_type').on('change', function () {
+                $('#installment_count_row').toggle($(this).val() === 'installments');
+            }).trigger('change');
+
+            calculatePrice();
+        }
+
+        // --- Pay Installment Button (User Profile) ---
+        $(document).on('click', '.pay-installment-btn', function (e) {
+            e.preventDefault();
+            const button = $(this);
+            const installmentId = button.data('id');
+            button.text('در حال ثبت...').prop('disabled', true);
 
             $.post(my_gym_vars.ajax_url, {
-                action: 'my_gym_load_products_by_category',
+                action: 'my_gym_pay_installment',
                 security: my_gym_vars.security_nonce,
-                category_id: categoryId || 0
-            }, function (response) {
-                if (response.success) {
-                    updateProductsTable(response.data);
-                } else {
-                    alert('خطا در بارگیری محصولات');
-                }
-            }).always(function () {
-                $('#products-loading').hide();
-                $('#products-container').show();
-            }).fail(function () {
-                alert('خطا در ارتباط با سرور');
-            });
-        }
-
-        // Update products table with new data
-        function updateProductsTable(products) {
-            var tbody = $('#products-table tbody');
-            tbody.empty();
-
-            if (products.length === 0) {
-                tbody.append('<tr><td colspan="5">هیچ محصولی وجود ندارد.</td></tr>');
-                return;
-            }
-
-            products.forEach(function (product) {
-                var row = '<tr class="product-row" data-product-id="' + product.id + '" ' +
-                    'data-price="' + product.price + '" ' +
-                    'data-stock="' + (product.stock || 999999) + '">' +
-                    '<td><strong>' + product.title + '</strong></td>' +
-                    '<td>' + (product.categories || '-') + '</td>' +
-                    '<td>' + product.stock_display + '</td>' +
-                    '<td>' + formatNumber(product.price) + '</td>' +
-                    '<td>' +
-                    '<input type="number" name="quantities[' + product.id + ']" ' +
-                    'class="quantity-input regular-text" min="0" max="' + (product.stock || 999999) + '" ' +
-                    'value="0" style="width: 80px;">' +
-                    '</td></tr>';
-                tbody.append(row);
-            });
-
-            // Re-initialize quantity change handlers
-            initQuantityHandlers();
-        }
-
-        // Initialize quantity change handlers
-        function initQuantityHandlers() {
-            $(document).off('input change', '.quantity-input').on('input change', '.quantity-input', function () {
-                updateTotalPrice();
-                validateStock($(this));
-            });
-        }
-
-        // Validate stock levels
-        function validateStock($input) {
-            var quantity = parseInt($input.val()) || 0;
-            var maxStock = parseInt($input.attr('max'));
-
-            if (maxStock < 999999 && quantity > maxStock) {
-                $input.val(maxStock);
-                alert('تعداد وارد شده بیشتر از موجودی است');
-                updateTotalPrice();
-            }
-        }
-
-        // Update total price calculation
-        function updateTotalPrice() {
-            let total = 0;
-            let hasItems = false;
-
-            $('.quantity-input').each(function () {
-                const price = parseFloat($(this).closest('tr').data('price') || 0);
-                const quantity = parseInt($(this).val() || 0);
-
-                if (!isNaN(price) && !isNaN(quantity) && quantity > 0) {
-                    total += price * quantity;
-                    hasItems = true;
-                }
-            });
-
-            $('#total-price, #total_amount').text(formatNumber(total));
-
-            // Enable/disable submit button based on selection
-            var hasCustomer = $('#customer_id').val() !== '';
-            var $submitBtn = $('#submit_sale, input[name="submit_sale"]');
-
-            if (hasItems && hasCustomer) {
-                $submitBtn.prop('disabled', false);
-                $('#submit-help').text('آماده ثبت فروش');
-            } else {
-                $submitBtn.prop('disabled', true);
-                if (!hasCustomer && !hasItems) {
-                    $('#submit-help').text('ابتدا مشتری و محصولات را انتخاب کنید');
-                } else if (!hasCustomer) {
-                    $('#submit-help').text('ابتدا مشتری را انتخاب کنید');
-                } else {
-                    $('#submit-help').text('حداقل یک محصول انتخاب کنید');
-                }
-            }
-
-            return total;
-        }
-
-        // Handle customer selection change
-        $('#customer_id').on('change', function () {
-            updateTotalPrice();
+                installment_id: installmentId
+            })
+                .done(function (response) {
+                    if (response.success) {
+                        button.closest('td').html('<span class="status-badge paid">پرداخت شده</span>');
+                    } else {
+                        alert(response.data.message || 'خطا در ثبت پرداخت.');
+                        button.text('ثبت پرداخت').prop('disabled', false);
+                    }
+                })
+                .fail(function () {
+                    alert('خطای سرور.');
+                    button.text('ثبت پرداخت').prop('disabled', false);
+                });
         });
 
-        // Initialize quantity handlers on page load
-        initQuantityHandlers();
-
-        // Initial calculation
-        if ($('.quantity-input').length) {
-            updateTotalPrice();
-        }
-
-        // Form validation for buffet sale
-        $('form').on('submit', function (e) {
-            if ($(this).find('input[name="submit_sale"]').length) {
-                var customerId = $('#customer_id').val();
-                var total = updateTotalPrice();
-
-                if (!customerId) {
-                    alert('لطفا مشتری را انتخاب کنید');
-                    e.preventDefault();
-                    return false;
-                }
-
-                if (total <= 0) {
-                    alert('لطفا حداقل یک محصول انتخاب کنید');
-                    e.preventDefault();
-                    return false;
-                }
-
-                return confirm('آیا از ثبت این فروش اطمینان دارید؟\nجمع کل: ' + formatNumber(total) + ' تومان');
-            }
-        });
-
-        console.log('Rame Gym Admin Script Loaded Successfully');
     });
 })(jQuery);

@@ -1,0 +1,98 @@
+/**
+ * Rame Gym - Frontend Profile Styles
+ */
+
+.rame-profile-container {
+    direction: rtl;
+    text-align: right;
+    font-family: 'vazirmatn', sans-serif;
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 25px 30px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.rame-profile-container h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.rame-profile-container .profile-section {
+    margin-bottom: 30px;
+}
+
+.rame-profile-container h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 15px;
+    color: #333;
+}
+
+.rame-profile-container ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rame-profile-container li {
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #555;
+}
+
+.rame-profile-container li strong {
+    color: #333;
+    min-width: 100px;
+    display: inline-block;
+}
+
+.installment-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 14px;
+}
+
+.installment-table th,
+.installment-table td {
+    padding: 12px 15px;
+    border: 1px solid #e5e5e5;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.installment-table thead th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 11px;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+.status-badge.active,
+.status-badge.paid {
+    background-color: #28a745;
+}
+
+.status-badge.pending {
+    background-color: #6c757d;
+}
+
+.status-badge.overdue,
+.status-badge.expired {
+    background-color: #dc3545;
+}

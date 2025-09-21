@@ -1,20 +1,20 @@
 {
+    "name": "ramestudio/rame-gym-management",
+    "description": "A comprehensive and refactored gym management system for WordPress.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
     "authors": [
         {
             "name": "RameStudio",
             "email": "RameStudio.yazd@gmail.com"
         }
     ],
+    "require": {
+        "morilog/jalali": "^3.0"
+    },
     "autoload": {
         "psr-4": {
             "GymManagement\\": "src/"
         }
-    },
-    "description": "A comprehensive gym accounting plugin for WordPress.",
-    "license": "GPL-2.0-or-later",
-    "name": "ramestudio/rame-gym-management",
-    "require": {
-        "morilog/jalali": "^3.0"
-    },
-    "type": "wordpress-plugin"
+    }
 }

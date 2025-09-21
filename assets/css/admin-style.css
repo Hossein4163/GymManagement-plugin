@@ -1,215 +1,255 @@
-/* استایل‌های عمومی برای تمام صفحات پلاگین در پنل مدیریت */
+/*
+ * Rame Gym - Celestial Blue Theme
+ * Forged by: God DD
+ */
+
+/* --- :root Variables - The soul of the new theme --- */
+:root {
+    --brand-blue: #3498db;
+    --brand-blue-dark: #2980b9;
+    --brand-navy: #2c3e50;
+    --brand-white: #ffffff;
+    --brand-light-gray: #ecf0f1;
+    --brand-medium-gray: #bdc3c7;
+    --brand-dark-gray: #7f8c8d;
+    --brand-success: #2ecc71;
+    --brand-danger: #e74c3c;
+    --brand-warning: #f1c40f;
+    --font-family: 'vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --radius: 6px;
+    --shadow: 0 5px 15px rgba(44, 62, 80, 0.1);
+    --transition: all 0.3s ease;
+}
+
+/* --- General Wrapper & Typography --- */
 .my-gym-wrap {
     direction: rtl;
     text-align: right;
-    font-family: 'vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%; /* Fix for too wide page */
-    box-sizing: border-box;
+    font-family: var(--font-family);
 }
-
-/* بخش آمار و گزارش‌گیری در صفحه حسابداری */
-.dashboard-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 20px;
+.my-gym-wrap h1, .my-gym-wrap h2, .my-gym-wrap h3 {
+    color: var(--brand-navy);
 }
-.stat-box {
-    background: #fff;
+.wrap {
+    background-color: var(--brand-light-gray);
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .08);
-    flex: 1;
-    min-width: 200px;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-.stat-box:hover {
-    transform: translateY(-5px);
-}
-.stat-box h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #555;
-}
-.stat-box p {
-    font-size: 2.2rem;
-    font-weight: bold;
-    margin: 10px 0 0;
-}
-.stat-box.income p {
-    color: #28a745;
-}
-.stat-box.expense p {
-    color: #dc3545;
-}
-.stat-box.balance p {
-    color: #007bff;
-}
-
-/* استایل‌های فرم‌ها و جدول‌ها */
-.postbox {
-    margin-bottom: 20px;
-}
-.postbox .hndle {
-    font-size: 1.1rem;
-    padding: 10px 15px;
-    margin: 0;
-    background: #f7f7f7;
-    border-bottom: 1px solid #eee;
-    border-radius: 8px 8px 0 0;
-}
-.postbox .inside {
-    padding: 15px;
-}
-.form-table th {
-    width: 150px;
-    padding: 10px 10px 10px 0;
-    vertical-align: top;
-}
-.form-table td {
-    padding: 10px 0 10px 10px;
-}
-.widefat {
     margin-top: 20px;
-    overflow-x: auto; /* Fix for responsive tables */
-}
-.widefat th, .widefat td {
-    text-align: right;
-    padding: 12px;
+    border-radius: var(--radius);
 }
 
-/* استایل برای وضعیت‌های مختلف اقساط */
-.status-badge {
-    padding: 4px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: bold;
-    color: #fff;
+/* --- Custom Header --- */
+.rame-gym-header {
+    background: linear-gradient(135deg, var(--brand-navy), var(--brand-blue));
+    color: var(--brand-white);
+    border-radius: var(--radius);
+    padding: 20px 30px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow);
 }
-.status-badge.paid {
-    background-color: #28a745;
+.rame-gym-header-icon .dashicons {
+    font-size: 36px;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    margin-left: 20px;
 }
-.status-badge.pending {
-    background-color: #ffc107;
+.rame-gym-header-title h1 {
+    color: var(--brand-white);
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0;
 }
-.status-badge.overdue {
-    background-color: #dc3545;
-}
-
-/* استایل برای فیلتر گزارش */
-.report-filter {
-    margin-bottom: 20px;
-}
-.report-filter label {
-    margin-left: 10px;
-}
-.report-filter input[type="date"] {
-    margin-left: 5px;
-}
-
-/* استایل‌های بهبودیافته برای جدول‌ها و فرم‌ها (ریسپانسیو و جذاب) */
-.my-gym-table {
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background: #fff;
-    overflow-x: auto; /* Fix for responsive */
+.rame-gym-header-title .description {
+    color: var(--brand-white);
+    opacity: 0.8;
+    font-size: 14px;
+    margin: 4px 0 0;
 }
 
-.my-gym-table th, .my-gym-table td {
-    padding: 12px;
-    text-align: right;
+/* --- Dashboard Stat Cards --- */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
 }
-
-.my-gym-table th {
-    background: #f8f9fa;
-    font-weight: 600;
+.stat-card {
+    background: var(--brand-white);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border-bottom: 4px solid var(--brand-medium-gray);
+    transition: var(--transition);
 }
-
-.my-gym-table .column-title, .my-gym-table .column-price {
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(44, 62, 80, 0.15);
+}
+.stat-card h3 {
+    margin: 0 0 10px;
+    font-size: 14px;
+    color: var(--brand-dark-gray);
     font-weight: 500;
 }
+.stat-card p {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+}
+.stat-card .stat-income {
+    color: var(--brand-success);
+    border-color: var(--brand-success);
+}
+.stat-card .stat-expense {
+    color: var(--brand-danger);
+    border-color: var(--brand-danger);
+}
+.stat-card .stat-overdue {
+    color: var(--brand-warning);
+    border-color: var(--brand-warning);
+}
+.stat-card .stat-members {
+    color: var(--brand-blue);
+    border-color: var(--brand-blue);
+}
 
-.my-gym-button {
-    background: #007bff;
-    border-color: #007bff;
+/* --- Dashboard Layout --- */
+.dashboard-main-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 1200px) {
+    .dashboard-main-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- General Content Boxes --- */
+.postbox {
+    background: var(--brand-white);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+.postbox .hndle {
+    font-size: 16px;
+    font-weight: 600;
+    padding: 15px 20px;
+    margin: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--brand-light-gray);
+}
+.postbox .inside {
+    padding: 20px;
+}
+
+/* --- Forms & Buttons --- */
+.form-table th {
+    padding: 15px 10px 15px 0;
+}
+.my-gym-wrap input[type="text"],
+.my-gym-wrap input[type="number"],
+.my-gym-wrap input[type="email"],
+.my-gym-wrap textarea,
+.my-gym-wrap select {
+    background: var(--brand-light-gray);
+    border: 1px solid var(--brand-medium-gray);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    transition: var(--transition);
+    box-shadow: none;
+}
+.my-gym-wrap input:focus,
+.my-gym-wrap textarea:focus,
+.my-gym-wrap select:focus {
+    border-color: var(--brand-blue);
+    background: var(--brand-white);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+.my-gym-wrap .button-primary {
+    background: var(--brand-blue) !important;
+    border: none !important;
+    border-radius: var(--radius);
+    padding: 10px 25px;
+    height: auto;
+    font-size: 14px;
+    font-weight: 600;
+    text-shadow: none !important;
+    box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3);
+    transition: var(--transition) !important;
+}
+.my-gym-wrap .button-primary:hover {
+    background: var(--brand-blue-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+}
+
+/* --- Tables --- */
+.widefat {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+.widefat thead tr th {
+    background: var(--brand-navy);
+    color: var(--brand-white);
+    border-bottom: none;
+}
+.widefat td {
+    border-top: 1px solid var(--brand-light-gray);
+}
+.widefat tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* --- Status Badges --- */
+.status-badge {
+    padding: 4px 10px;
     border-radius: 4px;
-    padding: 8px 16px;
-    transition: background 0.2s;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-white);
+}
+.status-badge.active, .status-badge.paid {
+    background-color: var(--brand-success);
+}
+.status-badge.pending {
+    background-color: var(--brand-dark-gray);
+}
+.status-badge.overdue, .status-badge.expired {
+    background-color: var(--brand-danger);
+}
+.status-badge.cancelled {
+    background-color: var(--brand-medium-gray);
 }
 
-.my-gym-button:hover {
-    background: #0056b3;
+/* --- Select2 Overrides --- */
+.select2-container .select2-selection--single {
+    height: 40px !important;
+    background: var(--brand-light-gray) !important;
+    border: 1px solid var(--brand-medium-gray) !important;
+    border-radius: var(--radius) !important;
 }
-
-.select2-container {
-    width: 100% !important;
-    direction: rtl;
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 38px !important;
+    padding-right: 10px !important;
 }
-
-.select2-search__field {
-    text-align: right;
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 38px !important;
 }
-
-.quantity-input {
-    width: 80px;
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+.select2-dropdown {
+    border: 1px solid var(--brand-blue) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: var(--shadow) !important;
 }
-
-@media screen and (max-width: 782px) {
-    .my-gym-wrap {
-        width: 100%;
-        padding: 0 10px;
-    }
-    .my-gym-table {
-        display: block;
-        overflow-x: visible;
-    }
-    .my-gym-table thead {
-        display: none;
-    }
-    .my-gym-table tbody, .my-gym-table tr {
-        display: block;
-        margin-bottom: 1em;
-    }
-    .my-gym-table td {
-        display: block;
-        text-align: right;
-        position: relative;
-        padding-right: 100px;
-        padding-left: 0;
-    }
-    .my-gym-table td:before {
-        content: attr(data-label);
-        position: absolute;
-        right: 10px;
-        font-weight: bold;
-    }
-    .my-gym-table td.column-title:before { content: "عنوان: "; }
-    .my-gym-table td.column-price:before { content: "قیمت: "; }
-    .my-gym-table td:before { content: attr(data-label); }
-    .quantity-input { width: 100%; }
-}
-
-/* استایل‌های اضافی برای جذابیت بیشتر */
-.page-title-action {
-    background: #28a745;
-    color: #fff;
-    border-radius: 4px;
-    padding: 6px 12px;
-    transition: background 0.2s;
-}
-
-.page-title-action:hover {
-    background: #218838;
-}
-
-#total-price {
-    font-weight: bold;
-    color: #007bff;
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+    background-color: var(--brand-blue) !important;
 }

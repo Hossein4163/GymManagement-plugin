@@ -1,28 +1,32 @@
 <?php
-// src/Controllers/FrontendController.php
 
 namespace GymManagement\Controllers;
 
-use GymManagement\Models\Member;
-
-class FrontendController
+final class FrontendController
 {
     public function __construct()
     {
-        add_shortcode('rame_user_profile', array($this, 'render_user_profile'));
+        add_shortcode('rame_user_profile', [$this, 'render_user_profile_shortcode']);
     }
 
-    public function render_user_profile()
+    /**
+     * Renders the user profile shortcode.
+     * Uses output buffering to capture the view file's content.
+     *
+     * @return string The HTML content of the user profile.
+     */
+    public function render_user_profile_shortcode(): string
     {
         if (!is_user_logged_in()) {
-            return '<p>لطفاً ابتدا وارد حساب کاربری خود شوید.</p>';
+            return '<p class="rame-gym-login-prompt">' . __('لطفاً برای مشاهده پروفایل خود، ابتدا وارد حساب کاربری شوید.', 'rame-gym') . '</p>';
         }
 
-        $user_id = get_current_user_id();
-        $member = new Member($user_id);
-
         ob_start();
-        include MY_GYM_PLUGIN_PATH . 'views/frontend-profile.php';
+
+        $user_id = get_current_user_id();
+        // Pass variables to the view file
+        require MY_GYM_PLUGIN_PATH . 'views/frontend-profile.php';
+
         return ob_get_clean();
     }
 }

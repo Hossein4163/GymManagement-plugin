@@ -2,29 +2,26 @@
 
 namespace GymManagement\Models;
 
-class Member
-{
-    public $user_id;
-    public $display_name;
-    public $national_id;
-    public $phone_number;
-    public $sport_discipline;
-    public $payment_type;
-    public $total_amount;
-    public $installment_count;
+use WP_User;
 
-    public function __construct($user_id)
+final class Member
+{
+    public int $user_id;
+    public string $display_name;
+    public string $email;
+    public string $national_id;
+    public string $phone_number;
+
+    public function __construct(int $user_id)
     {
         $this->user_id = $user_id;
         $user = get_user_by('id', $user_id);
-        if ($user) {
+
+        if ($user instanceof WP_User) {
             $this->display_name = $user->display_name;
-            $this->national_id = get_user_meta($user_id, 'national_id', true);
-            $this->phone_number = get_user_meta($user_id, 'phone_number', true);
-            $this->sport_discipline = get_user_meta($user_id, 'sport_discipline', true);
-            $this->payment_type = get_user_meta($user_id, 'payment_type', true);
-            $this->total_amount = get_user_meta($user_id, 'total_amount', true);
-            $this->installment_count = get_user_meta($user_id, 'installment_count', true);
+            $this->email = $user->user_email;
+            $this->national_id = get_user_meta($user_id, 'national_id', true) ?: '';
+            $this->phone_number = get_user_meta($user_id, 'phone_number', true) ?: '';
         }
     }
 }

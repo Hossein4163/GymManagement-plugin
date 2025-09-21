@@ -1,95 +1,104 @@
 <?php
-if (!is_user_logged_in()) {
-    return '<p>لطفاً ابتدا وارد حساب کاربری خود شوید.</p>';
-}
+/**
+ * View for the [rame_user_profile] shortcode.
+ * This file is included by FrontendController.
+ *
+ * @var int $user_id The current logged-in user's ID.
+ */
 
-$user_id = get_current_user_id();
-$member = new \GymManagement\Models\Member($user_id);
-$membership_controller = new \GymManagement\Controllers\MembershipController();
+use GymManagement\Controllers\MembershipController;
+use Morilog\Jalali\Jalalian;
+
+global $wpdb;
+
+// Fetch current active membership
+$memberships_table = $wpdb->prefix . 'gym_memberships';
+$active_membership = $wpdb->get_row($wpdb->prepare(
+    "SELECT * FROM {$memberships_table} WHERE user_id = %d AND status = 'active' ORDER BY start_date DESC LIMIT 1",
+    $user_id
+));
+
+$user_info = get_userdata($user_id);
 ?>
-<style>
-    .rame-profile-container {
-        direction: rtl;
-        text-align: right;
-        padding: 20px;
-        font-family: 'vazirmatn', sans-serif;
-    }
-
-    .rame-profile-container h2 {
-        font-size: 2rem;
-    }
-
-    .rame-profile-container h3 {
-        font-size: 1.5rem;
-        border-bottom: 2px solid #eee;
-        padding-bottom: 10px;
-        margin-top: 20px;
-    }
-
-    .rame-profile-container ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .rame-profile-container li {
-        margin-bottom: 10px;
-    }
-
-    .installment-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 15px;
-    }
-
-    .installment-table th, .installment-table td {
-        padding: 12px;
-        border: 1px solid #ccc;
-        text-align: right;
-    }
-</style>
 <div class="rame-profile-container">
-    <h2>پروفایل کاربری</h2>
-    <div class="profile-info">
-        <h3>اطلاعات شخصی</h3>
+    <h2><?php esc_html_e('پروفایل کاربری', 'rame-gym'); ?></h2>
+
+    <div class="profile-section">
+        <h3><?php esc_html_e('اطلاعات شما', 'rame-gym'); ?></h3>
         <ul>
-            <li><strong>نام:</strong> <?php echo esc_html($member->display_name); ?></li>
-            <li><strong>شماره تماس:</strong> <?php echo esc_html($member->phone_number ?: 'ثبت نشده'); ?></li>
-            <li><strong>رشته
-                    ورزشی:</strong> <?php echo esc_html(get_the_title($member->sport_discipline) ?: 'ثبت نشده'); ?></li>
+            <li>
+                <strong><?php esc_html_e('نام:', 'rame-gym'); ?></strong> <?php echo esc_html($user_info->display_name); ?>
+            </li>
+            <li>
+                <strong><?php esc_html_e('ایمیل:', 'rame-gym'); ?></strong> <?php echo esc_html($user_info->user_email); ?>
+            </li>
+            <li>
+                <strong><?php esc_html_e('شماره تماس:', 'rame-gym'); ?></strong> <?php echo esc_html(get_user_meta($user_id, 'phone_number', true) ?: 'ثبت نشده'); ?>
+            </li>
         </ul>
     </div>
 
-    <div class="payment-status">
-        <h3>وضعیت پرداخت</h3>
-        <p>نوع پرداخت شما: <?php echo ($member->payment_type == 'full') ? 'نقدی/کامل' : 'اقساطی'; ?></p>
+    <?php if ($active_membership) : ?>
+        <div class="profile-section">
+            <h3><?php esc_html_e('وضعیت عضویت فعال', 'rame-gym'); ?></h3>
+            <ul>
+                <li>
+                    <strong><?php esc_html_e('رشته ورزشی:', 'rame-gym'); ?></strong> <?php echo esc_html(get_the_title($active_membership->discipline_id)); ?>
+                </li>
+                <li>
+                    <strong><?php esc_html_e('تاریخ شروع:', 'rame-gym'); ?></strong> <?php echo esc_html(Jalalian::fromDateTime($active_membership->start_date)->format('Y/m/d')); ?>
+                </li>
+                <li>
+                    <strong><?php esc_html_e('تاریخ انقضا:', 'rame-gym'); ?></strong> <?php echo esc_html(Jalalian::fromDateTime($active_membership->end_date)->format('Y/m/d')); ?>
+                </li>
+                <li><strong><?php esc_html_e('وضعیت:', 'rame-gym'); ?></strong> <span
+                        class="status-badge <?php echo esc_attr($active_membership->status); ?>"><?php echo esc_html(MembershipController::get_status_label($active_membership->status)); ?></span>
+                </li>
+            </ul>
 
-        <?php if ($member->payment_type == 'installments'): ?>
-            <h4>وضعیت اقساط</h4>
-            <table class="installment-table">
-                <thead>
-                <tr>
-                    <th>مبلغ قسط</th>
-                    <th>تاریخ سررسید</th>
-                    <th>وضعیت</th>
-                </tr>
-                </thead>
-                <tbody>
-                <?php
-                $installments = $membership_controller->get_installments_for_user($member->user_id);
-                foreach ($installments as $installment):
+            <?php
+            // If membership is paid by installments, show the installment table
+            if ($active_membership->payment_type === 'installments') :
+                $installments_table = $wpdb->prefix . 'gym_installments';
+                $installments = $wpdb->get_results($wpdb->prepare(
+                    "SELECT * FROM {$installments_table} WHERE membership_id = %d ORDER BY due_date ASC",
+                    $active_membership->id
+                ));
+
+                if (!empty($installments)) :
                     ?>
-                    <tr>
-                        <td><?php echo number_format($installment->amount, 2); ?> تومان</td>
-                        <td><?php echo esc_html($installment->due_date); ?></td>
-                        <td>
-                            <span class="status-badge <?php echo esc_attr($installment->status); ?>">
-                                <?php echo esc_html($membership_controller->get_installment_status_label($installment->status)); ?>
-                            </span>
-                        </td>
-                    </tr>
-                <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
-    </div>
+                    <h4 style="margin-top: 20px;"><?php esc_html_e('وضعیت اقساط این دوره', 'rame-gym'); ?></h4>
+                    <table class="installment-table">
+                        <thead>
+                        <tr>
+                            <th><?php esc_html_e('مبلغ قسط', 'rame-gym'); ?></th>
+                            <th><?php esc_html_e('تاریخ سررسید', 'rame-gym'); ?></th>
+                            <th><?php esc_html_e('وضعیت', 'rame-gym'); ?></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($installments as $installment): ?>
+                            <tr>
+                                <td><?php echo number_format($installment->amount); ?> تومان</td>
+                                <td><?php echo esc_html(Jalalian::fromDateTime($installment->due_date)->format('Y/m/d')); ?></td>
+                                <td>
+                                <span class="status-badge <?php echo esc_attr($installment->status); ?>">
+                                    <?php echo esc_html(MembershipController::get_status_label($installment->status)); ?>
+                                </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php
+                endif;
+            endif;
+            ?>
+        </div>
+    <?php else : ?>
+        <div class="profile-section">
+            <h3><?php esc_html_e('وضعیت عضویت', 'rame-gym'); ?></h3>
+            <p><?php esc_html_e('شما در حال حاضر عضویت فعالی ندارید.', 'rame-gym'); ?></p>
+        </div>
+    <?php endif; ?>
 </div>

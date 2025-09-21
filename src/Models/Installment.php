@@ -2,24 +2,28 @@
 
 namespace GymManagement\Models;
 
-class Installment
+final class Installment
 {
-    public $id;
-    public $user_id;
-    public $amount;
-    public $due_date;
-    public $payment_date;
-    public $status;
+    public ?int $id = null;
+    public int $membership_id;
+    public int $user_id;
+    public float $amount;
+    public string $due_date;
+    public ?string $payment_date = null;
+    public string $status;
 
-    public function __construct($data = [])
+    public function __construct(array $data = [])
     {
-        if (!empty($data)) {
-            $this->id = isset($data->id) ? intval($data->id) : null;
-            $this->user_id = isset($data->user_id) ? intval($data->user_id) : null;
-            $this->amount = isset($data->amount) ? floatval($data->amount) : 0;
-            $this->due_date = isset($data->due_date) ? sanitize_text_field($data->due_date) : '';
-            $this->payment_date = isset($data->payment_date) ? sanitize_text_field($data->payment_date) : null;
-            $this->status = isset($data->status) ? sanitize_text_field($data->status) : 'pending';
+        if (empty($data)) {
+            return;
         }
+
+        $this->id = isset($data['id']) ? intval($data['id']) : null;
+        $this->membership_id = intval($data['membership_id'] ?? 0);
+        $this->user_id = intval($data['user_id'] ?? 0);
+        $this->amount = floatval($data['amount'] ?? 0);
+        $this->due_date = sanitize_text_field($data['due_date'] ?? '');
+        $this->payment_date = isset($data['payment_date']) ? sanitize_text_field($data['payment_date']) : null;
+        $this->status = sanitize_text_field($data['status'] ?? 'pending');
     }
 }

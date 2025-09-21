@@ -3,7 +3,7 @@
         'name' => 'ramestudio/rame-gym-management',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '14df4366cf6db1f8b53170db2b98bf102113095c',
+        'reference' => 'bd8eb56d30d0f018d7a667a858f4cc0103c3a4ec',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -64,7 +64,7 @@
         'ramestudio/rame-gym-management' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '14df4366cf6db1f8b53170db2b98bf102113095c',
+            'reference' => 'bd8eb56d30d0f018d7a667a858f4cc0103c3a4ec',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
