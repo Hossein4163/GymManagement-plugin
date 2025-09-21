@@ -160,11 +160,95 @@ class GymManagementPlugin
 
     public function enqueue_assets($hook)
     {
-        if (strpos($hook, 'rame-gym') !== false || strpos($hook, 'users.php') !== false || $hook == 'post.php' || $hook == 'post-new.php' || $hook == 'edit.php') {
-            wp_enqueue_style('my-gym-admin-style', MY_GYM_PLUGIN_URL . 'assets/css/admin-style.css', array(), '1.0.2');
-            wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), '1.0.2', true);
-            wp_enqueue_script('chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.0', true);
-            wp_localize_script('my-gym-admin-script', 'my_gym_security_nonce', wp_create_nonce('my-gym-security-nonce'));
+        $screen = get_current_screen();
+        $is_gym_page = strpos($hook, 'rame-gym') !== false || $hook === 'users.php' || $hook === 'post.php' || $hook === 'post-new.php' || $hook === 'edit.php' || (isset($screen->base) && $screen->base === 'rame-gym_page_my-gym-buffet');
+
+        if (!$is_gym_page) {
+            return;
+        }
+
+        // استایل‌ها
+        wp_enqueue_style('my-gym-admin-style', MY_GYM_PLUGIN_URL . 'assets/css/admin-style.css', array(), '1.0.4');
+
+        // اسکریپت‌ها با وابستگی به jQuery
+        wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), '1.0.4', true);
+
+        // Chart.js با فال‌بک محلی
+        $chart_js_url = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js';
+        $chart_js_local = MY_GYM_PLUGIN_URL . 'assets/js/chart.js';
+        wp_register_script('chart-js', $chart_js_url, array('jquery'), '4.4.0', true);
+        wp_enqueue_script('chart-js');
+        wp_script_add_data('chart-js', 'async', true);
+
+        // Select2 با فال‌بک محلی
+        $select2_css_url = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css';
+        $select2_css_local = MY_GYM_PLUGIN_URL . 'assets/css/select2.min.css';
+        wp_register_style('select2', $select2_css_url, array(), '4.1.0');
+        wp_enqueue_style('select2');
+        wp_style_add_data('select2', 'alt', $select2_css_local);
+
+        $select2_js_url = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
+        $select2_js_local = MY_GYM_PLUGIN_URL . 'assets/js/select2.min.js';
+        wp_register_script('select2', $select2_js_url, array('jquery'), '4.1.0', true);
+        wp_enqueue_script('select2');
+        wp_script_add_data('select2', 'alt', $select2_js_local);
+
+        // متغیرهای JS
+        wp_localize_script('my-gym-admin-script', 'my_gym_vars', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'security_nonce' => wp_create_nonce('my-gym-security-nonce')
+        ));
+
+        // دیباگ در محیط توسعه
+        if (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) {
+            wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), time(), true);
         }
     }
+
+//    public function enqueue_assets($hook)
+//    {
+//        $screen = get_current_screen();
+//        $is_gym_page = strpos($hook, 'rame-gym') !== false || $hook === 'users.php' || $hook === 'post.php' || $hook === 'post-new.php' || $hook === 'edit.php' || (isset($screen->base) && $screen->base === 'rame-gym_page_my-gym-buffet');
+//
+//        if (!$is_gym_page) {
+//            return;
+//        }
+//
+//        // استایل‌ها
+//        wp_enqueue_style('my-gym-admin-style', MY_GYM_PLUGIN_URL . 'assets/css/admin-style.css', array(), '1.0.4');
+//
+//        // اسکریپت‌ها با وابستگی به jQuery
+//        wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), '1.0.4', true);
+//
+//        // Chart.js با فال‌بک محلی
+//        $chart_js_url = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js';
+//        $chart_js_local = MY_GYM_PLUGIN_URL . 'assets/js/chart.js';
+//        wp_register_script('chart-js', $chart_js_url, array('jquery'), '4.4.0', true);
+//        wp_enqueue_script('chart-js');
+//        wp_script_add_data('chart-js', 'async', true); // بارگذاری غیرهمزمان برای عملکرد بهتر
+//
+//        // Select2 با فال‌بک محلی
+//        $select2_css_url = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css';
+//        $select2_css_local = MY_GYM_PLUGIN_URL . 'assets/css/select2.min.css';
+//        wp_register_style('select2', $select2_css_url, array(), '4.1.0');
+//        wp_enqueue_style('select2');
+//        wp_style_add_data('select2', 'alt', $select2_css_local); // فال‌بک محلی
+//
+//        $select2_js_url = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js';
+//        $select2_js_local = MY_GYM_PLUGIN_URL . 'assets/js/select2.min.js';
+//        wp_register_script('select2', $select2_js_url, array('jquery'), '4.1.0', true);
+//        wp_enqueue_script('select2');
+//        wp_script_add_data('select2', 'alt', $select2_js_local); // فال‌بک محلی
+//
+//        // متغیرهای JS
+//        wp_localize_script('my-gym-admin-script', 'my_gym_vars', array(
+//            'ajax_url' => admin_url('admin-ajax.php'),
+//            'security_nonce' => wp_create_nonce('my-gym-security-nonce')
+//        ));
+//
+//        // دیباگ در محیط توسعه
+//        if (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) {
+//            wp_enqueue_script('my-gym-admin-script', MY_GYM_PLUGIN_URL . 'assets/js/admin-script.js', array('jquery'), time(), true); // برای جلوگیری از cache
+//        }
+//    }
 }

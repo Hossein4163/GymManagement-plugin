@@ -3,6 +3,10 @@
     direction: rtl;
     text-align: right;
     font-family: 'vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%; /* Fix for too wide page */
+    box-sizing: border-box;
 }
 
 /* بخش آمار و گزارش‌گیری در صفحه حسابداری */
@@ -71,6 +75,7 @@
 }
 .widefat {
     margin-top: 20px;
+    overflow-x: auto; /* Fix for responsive tables */
 }
 .widefat th, .widefat td {
     text-align: right;
@@ -104,4 +109,107 @@
 }
 .report-filter input[type="date"] {
     margin-left: 5px;
+}
+
+/* استایل‌های بهبودیافته برای جدول‌ها و فرم‌ها (ریسپانسیو و جذاب) */
+.my-gym-table {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: #fff;
+    overflow-x: auto; /* Fix for responsive */
+}
+
+.my-gym-table th, .my-gym-table td {
+    padding: 12px;
+    text-align: right;
+}
+
+.my-gym-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+
+.my-gym-table .column-title, .my-gym-table .column-price {
+    font-weight: 500;
+}
+
+.my-gym-button {
+    background: #007bff;
+    border-color: #007bff;
+    border-radius: 4px;
+    padding: 8px 16px;
+    transition: background 0.2s;
+}
+
+.my-gym-button:hover {
+    background: #0056b3;
+}
+
+.select2-container {
+    width: 100% !important;
+    direction: rtl;
+}
+
+.select2-search__field {
+    text-align: right;
+}
+
+.quantity-input {
+    width: 80px;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+@media screen and (max-width: 782px) {
+    .my-gym-wrap {
+        width: 100%;
+        padding: 0 10px;
+    }
+    .my-gym-table {
+        display: block;
+        overflow-x: visible;
+    }
+    .my-gym-table thead {
+        display: none;
+    }
+    .my-gym-table tbody, .my-gym-table tr {
+        display: block;
+        margin-bottom: 1em;
+    }
+    .my-gym-table td {
+        display: block;
+        text-align: right;
+        position: relative;
+        padding-right: 100px;
+        padding-left: 0;
+    }
+    .my-gym-table td:before {
+        content: attr(data-label);
+        position: absolute;
+        right: 10px;
+        font-weight: bold;
+    }
+    .my-gym-table td.column-title:before { content: "عنوان: "; }
+    .my-gym-table td.column-price:before { content: "قیمت: "; }
+    .my-gym-table td:before { content: attr(data-label); }
+    .quantity-input { width: 100%; }
+}
+
+/* استایل‌های اضافی برای جذابیت بیشتر */
+.page-title-action {
+    background: #28a745;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 12px;
+    transition: background 0.2s;
+}
+
+.page-title-action:hover {
+    background: #218838;
+}
+
+#total-price {
+    font-weight: bold;
+    color: #007bff;
 }
